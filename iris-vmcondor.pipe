@@ -1,0 +1,22 @@
+{
+  "cache_seconds": 3600,
+  "machinetypes":
+  [
+   {
+    "backoff_seconds": 600,
+    "fizzle_seconds": 600,
+    "heartbeat_file": "heartbeat",
+    "heartbeat_seconds": 600,
+    "machine_model": "cernvm3",
+    "min_wallclock_seconds": 86400,
+    "max_wallclock_seconds": 99999,
+    "max_processors": 1,
+    "root_image": "https://repo.iris.ac.uk/iris-vmcondor/cernvm3.iso",
+    "suffix": "prod",
+    "target_share": 1.0,
+    "user_data": "https://repo.iris.ac.uk/iris-vmcondor/iris-vmcondor-cernvm3.user_data",
+    "user_data_file_hostcert": "hostcert.pem",
+    "user_data_file_hostkey": "hostkey.pem"
+   }
+  ]
+}

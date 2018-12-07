@@ -1,0 +1,255 @@
+From nobody Thu May 24 16:01:03 2018
+Content-Type: multipart/mixed; boundary="===============3684664014224059468=="
+MIME-Version: 1.0
+Comment: #  
+ # VMCondor: generic Cloud Init user_data template file for use with Vacuum
+ # based systems (Vac,Vcycle), and containing the following 
+ # ##user_data___## substitutions: 
+ #   ##user_data_option_cvmfs_proxy##
+ #   ##user_data_space##
+ # Each substitution pattern may occur more than once in this template. If
+ # you are reading a processed file, then these substitutions will already
+ # have been made below. 
+ # This file should normally be processed by Vcycle or Vac internally
+ # Andrew.McNab@cern.ch December 2018 # 
+
+--===============3684664014224059468==
+MIME-Version: 1.0
+Content-Type: text/cloud-config; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="tmp_cloud-config"
+
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+bootcmd:
+  - hostname ##user_data_machine_hostname##
+  - echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+  - echo `hostname --all-ip-addresses` `hostname` `hostname -s` >>/etc/hosts
+  - mkdir /scratch && chmod ugo+rwxt /scratch && mkfs -q -t ext4 /dev/vda2 && mount /dev/vda2 /scratch
+  - fallocate -l 8G /scratch/swapfile
+  - chmod 0600 /scratch/swapfile
+  - mkswap /scratch/swapfile
+  - swapon /scratch/swapfile
+  - sysctl vm.swappiness=1
+cvmfs:
+    local:
+        CVMFS_CACHE_BASE: /mnt/.rw/cvmfs-cache
+        CVMFS_QUOTA_LIMIT: 7000
+        CVMFS_REPOSITORIES: grid,software
+        CVMFS_HTTP_PROXY: ##user_data_option_cvmfs_proxy##
+runcmd:
+  - mkdir -p /scratch/condor/
+  - chown condor:condor /scratch/condor/
+write_files:
+  - owner: root:root
+    path: /etc/profile.d/mjf.sh
+    permissions: '0644'
+    content: |
+        export MACHINEFEATURES=##user_data_machinefeatures_url##
+        export JOBFEATURES=##user_data_jobfeatures_url##
+        export JOBOUTPUTS=##user_data_joboutputs_url##
+  - owner: root:root
+    path: /etc/profile.d/mjf.csh
+    permissions: '0644'
+    content: |
+        setenv MACHINEFEATURES ##user_data_machinefeatures_url##
+        setenv JOBFEATURES ##user_data_jobfeatures_url##
+        setenv JOBOUTPUTS ##user_data_joboutputs_url##
+  - owner: root:root
+    path: /usr/local/bin/user_job_wrapper
+    permissions: '0755'
+    content: |
+        #!/bin/sh
+        export HOME=`pwd`
+        . /etc/profile
+        . /etc/bashrc
+        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/a1_grid_env.sh
+        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/setup-wn-example.sh
+        random=`/usr/bin/openssl rand -hex 16`
+        ln _condor_stdout /scratch/joblogs/_condor_stdout.$random
+        ln _condor_stderr /scratch/joblogs/_condor_stderr.$random
+        exec $*
+  - owner: root:root
+    path: /usr/local/bin/condor_config_script
+    permissions: '0755'
+    content: |
+        #!/bin/bash
+
+        # UID_DOMAIN may be used by ALLOW rules
+        #
+        if [ "##user_data_option_uid_domain##" != ""  ] ; then
+          echo "UID_DOMAIN = ##user_data_option_uid_domain##" >>/etc/condor/condor_config.local
+        else
+          echo "UID_DOMAIN = `hostname --domain`" >>/etc/condor/condor_config.local
+        fi
+
+        # Authentication may be based on a shared password
+        #
+        if [ "##user_data_option_pool_password_base64##" != ""  ] ; then
+          echo "##user_data_option_pool_password_base64##" | base64 -d > /etc/condor/pool_password
+          chmod 0400 /etc/condor/pool_password
+          echo 'SEC_PASSWORD_FILE = /etc/condor/pool_password' >>/etc/condor/condor_config.local
+        fi
+condor:
+  ALLOW_ADMINISTRATOR: $(FULL_HOSTNAME)
+  ALLOW_DAEMON: $(ALLOW_WRITE)
+  ALLOW_WRITE: $(ALLOW_WRITE), $(CONDOR_HOST), $(IP_ADDRESS)
+  CCB_ADDRESS: $(COLLECTOR_HOST)
+  CCB_HEARTBEAT_INTERVAL: 120
+  CLAIM_WORKLIFE: 0
+  COLLECTOR_HOST: $(CONDOR_HOST)
+  COLLECTOR_PORT: 9618
+  CONDOR_ADMIN: root@$(CONDOR_HOST)
+  CONDOR_HOST: ##user_data_option_condor_host##
+  DAEMON_LIST: MASTER, STARTD 
+  DEDICATED_EXECUTE_ACCOUNT_REGEXP: cndrusr[0-9]+
+  ENABLE_SSH_TO_JOB: True
+  EXECUTE: /scratch/condor
+  GSI_DAEMON_CERT: /tmp/x509proxy.pem
+  GSI_DAEMON_DIRECTORY: /etc/grid-security
+  GSI_DAEMON_KEY: /tmp/x509proxy.pem
+  GSI_DAEMON_TRUSTED_CA_DIR: /etc/grid-security/certificates/
+  GSI_DELEGATION_KEYBITS: 1024
+  GSI_SKIP_HOST_CHECK: TRUE
+  HIGHPORT: 25000
+  HOSTNAME: ##user_data_machine_hostname##
+  KILL: FALSE
+  MASTER_DEBUG: D_ALWAYS
+  MASTER_UPDATE_INTERVAL: 60
+  MAXJOBRETIREMENTTIME: 172800
+  NEGOTIATOR_INTERVAL: 60
+  NUM_SLOTS: 1
+  PREEMPT: FALSE
+  SEC_CLIENT_AUTHENTICATION: REQUIRED
+  SEC_CLIENT_AUTHENTICATION_METHODS: GSI,FS,PASSWORD
+  SEC_CLIENT_INTEGRITY: REQUIRED
+  SEC_DAEMON_AUTHENTICATION: REQUIRED
+  SEC_DAEMON_AUTHENTICATION_METHODS: GSI,FS,PASSWORD
+  SEC_DAEMON_INTEGRITY: REQUIRED
+  SEC_DEFAULT_AUTHENTICATION: REQUIRED
+  SEC_DEFAULT_AUTHENTICATION_METHODS: GSI,FS,PASSWORD
+  SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION: FALSE
+  SLOT1_USER: cndrusr1
+  START: FALSE
+  STARTD_ATTRS: VacuumSpace
+  STARTD_DEBUG: D_ALWAYS
+  STARTD_NOCLAIM_SHUTDOWN: 600
+  STARTER_DEBUG: D_ALWAYS
+  SUSPEND: FALSE
+  UPDATE_COLLECTOR_WITH_TCP: TRUE
+  UPDATE_INTERVAL: 60
+  USE_SHARED_PORT: FALSE
+  USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
+  VacuumSpace: '"##user_data_space##"'
+
+--===============3684664014224059468==
+MIME-Version: 1.0
+Content-Type: text/ucernvm; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="VMCondor_ucernvm"
+
+[ucernvm-begin]
+resize_rootfs=off
+cvmfs_http_proxy='##user_data_option_cvmfs_proxy##'
+[ucernvm-end]
+
+--===============3684664014224059468==
+MIME-Version: 1.0
+Content-Type: text/x-shellscript; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="VMCondor_shellscript"
+
+#!/bin/sh
+if [ "$1" == "stop" ] ; then exit; fi 
+
+mkdir -p /var/spool/joboutputs
+chmod ugo+rwxt /var/spool/joboutputs/
+
+(
+cat <<EOF >/tmp/x509proxy.pem
+##user_data_option_x509_proxy##
+##user_data_file_hostcert##
+##user_data_file_hostkey##
+EOF
+chown root.root /tmp/x509proxy.pem
+chmod 0400 /tmp/x509proxy.pem
+openssl x509 -in /tmp/x509proxy.pem -text > /var/spool/joboutputs/x509proxy.cert.pem
+
+# Send a heartbeat every 5 minutes
+(
+while true
+do
+  echo `cut -f1-3 -d' ' /proc/loadavg` `cat /proc/uptime` >/var/spool/joboutputs/heartbeat
+  date --utc +"%Y-%m-%d %H:%M:%S %Z Uploading heartbeat"
+  /usr/bin/curl --max-time 30 --capath /etc/grid-security/certificates/ --cert /tmp/x509proxy.pem --cacert /tmp/x509proxy.pem --location --upload-file /var/spool/joboutputs/heartbeat '##user_data_joboutputs_url##/heartbeat'
+  date --utc +"%Y-%m-%d %H:%M:%S %Z curl returns $?"
+  sleep 300
+done
+) >/var/log/heartbeat.log 2>&1 &
+
+# Hard links to _condor_stdout and _condor_stderr of HTCondor jobs go here
+mkdir -p /scratch/joblogs
+chmod ugo+wxt,u+r,go-r /scratch/joblogs
+
+wall_limit_secs=`python -c "import urllib ; print urllib.urlopen('##user_data_jobfeatures_url##/wall_limit_secs').read().strip()"`
+if [ "$wall_limit_secs" -gt 0 ] ; then
+  date --utc +"%Y-%m-%d %H:%M:%S %Z Set MAXJOBRETIREMENTTIME from \$JOBFEATURES/wall_limit_secs = $wall_limit_secs"
+  echo "MAXJOBRETIREMENTTIME = $wall_limit_secs" >>/etc/condor/condor_config.local
+fi
+
+# We didn't start at boot time, to allow /tmp/x509proxy.pem creation etc
+echo 'START = TRUE' >>/etc/condor/condor_config.local
+
+# In case the VO needs to update Condor configuration with a script
+if [ -x /usr/local/bin/condor_config_script ] ; then
+  /usr/local/bin/condor_config_script
+fi
+
+# Apply the updated configuration
+condor_reconfig
+
+# Record final Condor configuration
+date --utc +"%Y-%m-%d %H:%M:%S %Z Recording final HTCondor configuration"
+condor_config_val -dump >/var/spool/joboutputs/condor_config_val-dump.log
+
+# Wait for condor_startd to start
+while ! ps -C condor_startd >/dev/null ; do date --utc +"%Y-%m-%d %H:%M:%S %Z condor_startd not yet started" ; sleep 10 ; done
+
+# In the background, give Condor startd 30 minutes to find a job then tell it to stop after the job (or now!)
+# Condor may stop before condor_off is run, due to STARTD_NOCLAIM_SHUTDOWN (600s?)
+(sleep 1800 ; while ! condor_off -daemon startd -peaceful ; do sleep 60; done) >/var/spool/joboutputs/condor_off.log 2>&1 &
+
+# Wait for condor_startd to stop
+date --utc +"%Y-%m-%d %H:%M:%S %Z Waiting for condor_startd to finish"
+while ps -C condor_startd >/dev/null ; do sleep 60 ; done
+date --utc +"%Y-%m-%d %H:%M:%S %Z condor_startd finished"
+  
+# Always try to make simple HTCondor shutdown messages
+if [ ! -s /var/log/condor/startd_history ] ; then
+  echo '300 No HTCondor job to run' > /var/spool/joboutputs/shutdown_message
+else
+  echo '200 Success' > /var/spool/joboutputs/shutdown_message
+fi
+
+# If VO provides something else, run that too
+if [ -x /usr/local/bin/make_shutdown_message ] ; then
+  /usr/local/bin/make_shutdown_message
+fi
+
+# Time to upload and shutdown
+cd /var/spool/joboutputs
+cp -f /var/log/condor/* /var/log/cloud-init*.log /scratch/joblogs/* .
+for i in * 
+do 
+  curl --capath /etc/grid-security/certificates/ --cert /tmp/x509proxy.pem --cacert /tmp/x509proxy.pem --location --upload-file "$i" '##user_data_joboutputs_url##/'
+done
+
+# Try normal shutdown
+shutdown -h now
+sleep 60
+# Otherwise instant shutdown
+echo o > /proc/sysrq-trigger
+
+) >/var/spool/joboutputs/shellscript.log 2>&1 &
+
+--===============3684664014224059468==--
+
