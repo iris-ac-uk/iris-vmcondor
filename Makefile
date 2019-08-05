@@ -1,5 +1,5 @@
 
-all: IRIS.user_data
+all: user_data
 
 VMCONDOR_FILES=make_multipart_user_data      \
                   VMCondor_comments          \
@@ -8,5 +8,6 @@ VMCONDOR_FILES=make_multipart_user_data      \
                   VMCondor_ucernvm           \
                   VMCondor_shellscript
 
-IRIS.user_data: IRIS.condor $(VMCONDOR_FILES)
+user_data: IRIS.condor $(VMCONDOR_FILES)
 	./make_VMCondor_user_data IRIS
+	mv IRIS.user_data user_data
