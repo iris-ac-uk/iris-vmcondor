@@ -1,0 +1,13 @@
+#  
+# VMCondor: generic Cloud Init user_data template file for use with Vacuum
+# based systems (Vac,Vcycle), and containing the following 
+# ##user_data___## substitutions:
+#   ##user_data_option_cvmfs_proxy##
+#   ##user_data_space##
+# Each substitution pattern may occur more than once in this template. If
+# you are reading a processed file, then these substitutions will already
+# have been made below. 
+# This file should normally be processed by Vac (version 0.20.0 onwards) or
+# Vcycle (0.3.0 onwards) internally. 
+# Andrew.McNab@cern.ch October 2016
+# 

@@ -1,0 +1,52 @@
+output: {all: '| tee -a /var/log/cloud-init-output.log'}
+bootcmd:
+  - hostname ##user_data_machine_hostname##
+  - echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+  - echo `hostname --all-ip-addresses` `hostname` `hostname -s` >>/etc/hosts
+  - mkdir /scratch && chmod ugo+rwxt /scratch && mkfs -q -t ext4 /dev/vda2 && mount /dev/vda2 /scratch
+  - fallocate -l 8G /scratch/swapfile
+  - chmod 0600 /scratch/swapfile
+  - mkswap /scratch/swapfile
+  - swapon /scratch/swapfile
+  - sysctl vm.swappiness=1
+cvmfs:
+    local:
+        CVMFS_CACHE_BASE: /mnt/.rw/cvmfs-cache
+        CVMFS_QUOTA_LIMIT: 7000
+        CVMFS_REPOSITORIES: grid,alice,atlas,cms,lhcb
+        CVMFS_HTTP_PROXY: ##user_data_option_cvmfs_proxy##
+runcmd:
+  - mkdir -p /scratch/condor/
+  - chown condor:condor /scratch/condor/
+write_files:
+  - owner: root:root
+    path: /etc/profile.d/mjf.sh
+    permissions: '0644'
+    content: |
+        export MACHINEFEATURES=##user_data_machinefeatures_url##
+        export JOBFEATURES=##user_data_jobfeatures_url##
+        export JOBOUTPUTS=##user_data_joboutputs_url##
+  - owner: root:root
+    path: /etc/profile.d/mjf.csh
+    permissions: '0644'
+    content: |
+        setenv MACHINEFEATURES ##user_data_machinefeatures_url##
+        setenv JOBFEATURES ##user_data_jobfeatures_url##
+        setenv JOBOUTPUTS ##user_data_joboutputs_url##
+  - owner: root:root
+    path: /usr/local/bin/user_job_wrapper
+    permissions: '0755'
+    content: |
+        #!/bin/sh
+        export HOME=`pwd`
+        . /etc/profile
+        . /etc/bashrc
+        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/a1_grid_env.sh
+        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/setup-wn-example.sh
+        random=`/usr/bin/openssl rand -hex 16`
+        ln _condor_stdout /scratch/joblogs/_condor_stdout.$random
+        ln _condor_stderr /scratch/joblogs/_condor_stderr.$random
+        exec $*
+#
+# Per-experiment write_files sections are appended here ...
+#

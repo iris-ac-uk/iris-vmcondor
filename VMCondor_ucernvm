@@ -1,0 +1,4 @@
+[ucernvm-begin]
+resize_rootfs=off
+cvmfs_http_proxy='##user_data_option_cvmfs_proxy##'
+[ucernvm-end]

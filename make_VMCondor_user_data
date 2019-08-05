@@ -1,0 +1,25 @@
+#!/bin/sh
+
+if [ "$1" = "" ] ; then
+ echo 'make_VMCondor_user_data PREFIX'
+ exit 1
+fi
+
+cat VMCondor_cloud-config	 > tmp_cloud-config
+
+if [ -r "$1.write_files" ] ; then
+ cat $1.write_files		>> tmp_cloud-config
+fi
+
+cat VMCondor_condor		>> tmp_cloud-config
+
+if [ -r "$1.condor" ] ; then
+ sed 's/^/  /' $1.condor	>> tmp_cloud-config
+fi
+
+./make_multipart_user_data            \
+   VMCondor_comments:comment          \
+   tmp_cloud-config:cloud-config      \
+   VMCondor_ucernvm:ucernvm           \
+   VMCondor_shellscript:x-shellscript \
+   > $1.user_data
