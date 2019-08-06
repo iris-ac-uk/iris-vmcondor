@@ -1,0 +1,45 @@
+#!/bin/sh
+
+export VMCONDOR_HOST=vmcondor.iris.ac.uk
+export VMCONDOR_DIR=$HOME/dot.vmcondor
+export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
+export X509_USER_CERT=$VMCONDOR_DIR/usercert.pem
+export X509_USER_KEY=$VMCONDOR_DIR/userkey.pem
+export VMCONDOR_COMMANDS='vmcondor_submit vmcondor_q vmcondor_status vmcondor_history vmcondor_transfer_data'
+
+BASENAME=`basename $0`
+if [ "$BASENAME" = "vmcondor_submit" ] ; then
+# exec condor_submit -pool $VMCONDOR_HOST -remote $VMCONDOR_HOST $*
+ exec condor_submit -pool $VMCONDOR_HOST -remote vmcondor@$VMCONDOR_HOST $*
+elif [ "$BASENAME" = "vmcondor_q" ] ; then
+ exec condor_q -pool $VMCONDOR_HOST -global $*
+elif [ "$BASENAME" = "vmcondor_status" ] ; then
+ exec condor_status -pool $VMCONDOR_HOST $*
+elif [ "$BASENAME" = "vmcondor_history" ] ; then
+ exec condor_history -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
+elif [ "$BASENAME" = "vmcondor_transfer_data" ] ; then 
+ exec condor_transfer_data -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
+else
+ cd `dirname $0`
+ 
+ for i in $VMCONDOR_COMMANDS
+ do
+   ln -sf vmcondor_setup $i
+ done
+
+ mkdir -p $VMCONDOR_DIR
+ cat <<EOF >$VMCONDOR_DIR/vmcondor_config
+# Do not edit! Created by vmcondor_setup
+CONDOR_HOST = vmcondor.iris.ac.uk
+COLLECTOR_HOST = \$(CONDOR_HOST)
+SCHEDD_NAME = vmcondor@\$(CONDOR_HOST)
+REQUIRE_LOCAL_CONFIG_FILE = false
+use SECURITY : HOST_BASED
+ALL_DEBUG = TRUE
+GSI_SKIP_HOST_CHECK_CERT_REGEX = .*
+DAEMON_LIST = 
+GSI_CLIENT_TRUSTED_CA_DIR = /etc/grid-security/certificates
+EOF
+
+ exit 0
+fi
