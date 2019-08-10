@@ -1,0 +1,37 @@
+[ req ]
+distinguished_name = req_distinguished_name
+
+[ req_distinguished_name ]
+organizationName = Organization Name (eg, company)
+commonName	 = Common Name (eg, fully qualified host name)
+
+[ ca ]
+default_ca              = root_ca               # The default CA section
+
+[ root_ca ]
+certificate             = VMCondorCA00.pem
+private_key             = VMcondorCA00key.pem
+new_certs_dir           = .
+database                = ca.db
+unique_subject          = no
+serial                  = ca.serial
+default_md              = sha256
+email_in_dn             = no
+policy                  = match_pol
+
+[ match_pol ]
+organizationName        = match                 # Must match 'Simple Inc'
+commonName              = supplied              # Must be present
+
+[ ca_ext ]
+basicConstraints        = critical,CA:true
+keyUsage                = critical,keyCertSign,cRLSign
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+
+[ user_ext ]
+basicConstraints        = CA:false
+keyUsage                = critical,digitalSignature,keyEncipherment,dataEncipherment
+extendedKeyUsage        = clientAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
