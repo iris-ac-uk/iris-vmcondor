@@ -1,33 +1,201 @@
 #!/bin/sh
 
+export VMCONDOR_VERSION=00.00.01
 export VMCONDOR_HOST=vmcondor.iris.ac.uk
 export VMCONDOR_DIR=$HOME/dot.vmcondor
 export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
-export X509_USER_CERT=$VMCONDOR_DIR/usercert.pem
-export X509_USER_KEY=$VMCONDOR_DIR/userkey.pem
-export VMCONDOR_COMMANDS='vmcondor_submit vmcondor_q vmcondor_status vmcondor_history vmcondor_transfer_data'
+export X509_USER_CERT=$VMCONDOR_DIR/vmcondor.key
+export X509_USER_KEY=$VMCONDOR_DIR/vmcondor.key
+export X509_CERT_DIR=$VMCONDOR_DIR/certificates
+export VMCONDOR_COMMANDS='vmcondor_version vmcondor_submit vmcondor_q vmcondor_status vmcondor_transfer_data'
 
 BASENAME=`basename $0`
-if [ "$BASENAME" = "vmcondor_submit" ] ; then
-# exec condor_submit -pool $VMCONDOR_HOST -remote $VMCONDOR_HOST $*
+if [ "$BASENAME" = "vmcondor_version" ] ; then
+ echo "\$VMCondorVersion: $VMCONDOR_VERSION \$"
+q exec condor_version
+elif [ "$BASENAME" = "vmcondor_submit" ] ; then
  exec condor_submit -pool $VMCONDOR_HOST -remote vmcondor@$VMCONDOR_HOST $*
 elif [ "$BASENAME" = "vmcondor_q" ] ; then
  exec condor_q -pool $VMCONDOR_HOST -global $*
 elif [ "$BASENAME" = "vmcondor_status" ] ; then
  exec condor_status -pool $VMCONDOR_HOST $*
-elif [ "$BASENAME" = "vmcondor_history" ] ; then
- exec condor_history -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
 elif [ "$BASENAME" = "vmcondor_transfer_data" ] ; then 
  exec condor_transfer_data -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
 else
+
+ if [ ! -d $VMCONDOR_DIR ] ; then
+   echo "Creating $VMCONDOR_DIR"
+   mkdir -p $VMCONDOR_DIR
+ fi
+
+ mkdir -p $VMCONDOR_DIR/certificates
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/UKeScienceRoot-2007.pem
+subject= /C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root
+issuer= /C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root
+notBefore=Oct 30 09:00:00 2007 GMT
+notAfter=Oct 30 09:00:00 2027 GMT
+-----BEGIN CERTIFICATE-----
+MIIDhjCCAm6gAwIBAgIBADANBgkqhkiG9w0BAQUFADBUMQswCQYDVQQGEwJVSzEV
+MBMGA1UEChMMZVNjaWVuY2VSb290MRIwEAYDVQQLEwlBdXRob3JpdHkxGjAYBgNV
+BAMTEVVLIGUtU2NpZW5jZSBSb290MB4XDTA3MTAzMDA5MDAwMFoXDTI3MTAzMDA5
+MDAwMFowVDELMAkGA1UEBhMCVUsxFTATBgNVBAoTDGVTY2llbmNlUm9vdDESMBAG
+A1UECxMJQXV0aG9yaXR5MRowGAYDVQQDExFVSyBlLVNjaWVuY2UgUm9vdDCCASIw
+DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM3ORtmmUHotwDTfAH5/eIlo3+BK
+oElDeaeN5Sg2lhPu0laPch7pHKSzlqyHmZGsk3fZb8hBmO0lD49+dKnA31zLU6ko
+Bje1THqdrGZPcjTm0lhc/SjzsBtWm4oC/bpYBACliB9wa3eSuU4Rqq71n7+4J+WO
+KvaDHvaTdRYE3pyie2Xe5QTI8CXedCMh18+EdFvwlV79dlmNRNY93ZWUu6POL6d+
+LapQkUmasXLjyjNzcoPXgDyGauHOqmyqxuPx4tDTsC25nKr+7K5k3T+lplJ/jMkQ
+l/QHgqnABBXQILzzrt0a8nQdM8ONA+bht+8sy4eN/0zMulNj8kAzrutkhJsCAwEA
+AaNjMGEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAQYwHQYDVR0OBBYE
+FF74G0imd2spPC4AUzMrY6J7fpPAMB8GA1UdIwQYMBaAFF74G0imd2spPC4AUzMr
+Y6J7fpPAMA0GCSqGSIb3DQEBBQUAA4IBAQCT0a0kcE8oVYzjTGrd5ayvOI+vbdiY
+MG7/2V2cILKIts7DNdIrEIonlV0Cw96pQShjRRIizSHG5eH1kLJcbK/DpgX6QuPR
+WhWR5wDJ4vaz0qTmUpwEpsT9mmyehhHbio/EsYM7LesScJrO2piD2Bf6pFUMR1LC
+scAqN7fTXJSg6Mj6tOhpWpPwM9WSwQn8sDTgL0KkrjVOVaeJwlyNyEfUpJuFIgTl
+rEnkXqhWQ6ozArDonB4VHlew6eqIGaxWB/yWMNvY5K+b1j5fdcMelzA45bFucOf1
+Ag+odBgsGZahpFgOqKvBuvSrk/8+ie8I2CVYwT486pPnb5JFgHgUfZo8
+-----END CERTIFICATE-----
+EOF
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/UKeScienceRoot-2007.signing_policy
+# @(#)$Id: 98ef0ee5.signing_policy,v 1.3 2013/01/21 10:13:18 pmacvsdg Exp $
+ access_id_CA   X509    '/C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2A" "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B"'
+
+# Uncomment the following instead, to enable the SLCS branches:
+# cond_subjects  globus  '"/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2A" "/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B" "/C=UK/O=eScienceSLCSHierarchy/OU=Authority/CN=SLCS Top Level CA"'
+EOF
+
+ ( cd $VMCONDOR_DIR/certificates
+   ln -sf UKeScienceRoot-2007.pem `openssl x509 -in UKeScienceRoot-2007.pem -hash -noout`.0 
+   ln -sf UKeScienceRoot-2007.signing_policy `openssl x509 -in UKeScienceRoot-2007.pem -hash -noout`.signing_policy )
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/UKeScienceCA-2B.pem
+subject= /C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B
+issuer= /C=UK/O=eScienceRoot/OU=Authority/CN=UK e-Science Root
+notBefore=Jun 18 13:00:00 2011 GMT
+notAfter=Oct 30 09:00:00 2027 GMT
+-----BEGIN CERTIFICATE-----
+MIIDwzCCAqugAwIBAgICASMwDQYJKoZIhvcNAQELBQAwVDELMAkGA1UEBhMCVUsx
+FTATBgNVBAoTDGVTY2llbmNlUm9vdDESMBAGA1UECxMJQXV0aG9yaXR5MRowGAYD
+VQQDExFVSyBlLVNjaWVuY2UgUm9vdDAeFw0xMTA2MTgxMzAwMDBaFw0yNzEwMzAw
+OTAwMDBaMFMxCzAJBgNVBAYTAlVLMRMwEQYDVQQKEwplU2NpZW5jZUNBMRIwEAYD
+VQQLEwlBdXRob3JpdHkxGzAZBgNVBAMTElVLIGUtU2NpZW5jZSBDQSAyQjCCASIw
+DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKkLgb2eIcly4LZfj0Rf5F7s+HE/
+6Tvpf4jsKkm7qs33y3EEudCbcPwQKjS2MgytPv+8xpEPHqy/hqTseNlZ6oJgc+V8
+xlJ+0iws882Ca8a9ZJ/iGQH9UzXU4q35ArN3cbwoWAAvMvzZ6hUV86fAAQ1AueQN
+6h7/tnfYfaUMiB4PNxucmouMHDJGmYzl47FtlLeHUr2c4m/oWSG5pADIvGFpWFHj
+NIw8/x4n97w5/ks0tc/8/5Q6xzUfCX/VfqciQCvKcui2J5MBhUlBDLenzwqvUytB
+4XAwX/pRcKmnFEYwoc9OKGExNx9tn9RjQYJAC/KLb44Jqno9l0eRxu3uw4sCAwEA
+AaOBnzCBnDAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBBjAdBgNVHQ4E
+FgQUEqW/kZ9/4q9qXAny4vpZ4Dbh81UwHwYDVR0jBBgwFoAUXvgbSKZ3ayk8LgBT
+Mytjont+k8AwOQYDVR0fBDIwMDAuoCygKoYoaHR0cDovL2NybC5jYS5uZ3MuYWMu
+dWsvY3JsL3Jvb3QtY3JsLmRlcjANBgkqhkiG9w0BAQsFAAOCAQEArd5TFOo9SzGW
+0+KrAdzzf60zh4Wy//vZz4tgt7NeDbNpz2TZROBAClSu7oLPiruzgnhNP/Vxeu0s
+pI41wRQsh0DVxhM+9ZFOskH+OdmHzKagoejvHh6Jt8WNN0eBLzN8Bvsue7ImJPaY
+cf/Qj1ZTBhaRHcMsLNnqak3un/P+uLPxqSuxVKMtC8es/jqosS4czJ3dgs1hgFy9
+nPQiwuIyf3OJ9eifAOGXk9Nlpha9C54zhc+hAkSLnpx/FhPjwLgpwDRgDJud6otH
+15x3qZqXNx7xbYfeHaM1R1HMEjfVdzKCTY4zsqNEGPEF/0nUQSFk6KQVz0/ugNmI
+9qoDx3FeEg==
+-----END CERTIFICATE-----
+EOF
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/UKeScienceCA-2B.signing_policy
+# @(#)$Id: ffc3d59b.signing_policy,v 1.3 2011/09/30 06:19:28 pmacvsdg Exp $
+#
+ access_id_CA   X509    '/C=UK/O=eScienceCA/OU=Authority/CN=UK e-Science CA 2B'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/C=UK/O=eScience/*"'
+EOF
+
+ ( cd $VMCONDOR_DIR/certificates
+   ln -sf UKeScienceCA-2B.pem `openssl x509 -in UKeScienceCA-2B.pem -hash -noout`.0 
+   ln -sf UKeScienceCA-2B.signing_policy `openssl x509 -in UKeScienceCA-2B.pem -hash -noout`.signing_policy )
+
+ ( cd $VMCONDOR_DIR/certificates ; ln -sf UKeScienceCA-2B.pem `openssl x509 -in UKeScienceCA-2B.pem -hash -noout`.0 )
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/VMCondorCA00.pem
+subject= /O=vmcondor.iris.ac.uk/CN=user0001
+issuer= /O=vmcondor.iris.ac.uk/CN=VMCondor CA 00
+notBefore=Aug 10 19:00:43 2019 GMT
+notAfter=Aug  9 19:00:43 2020 GMT
+-----BEGIN CERTIFICATE-----
+MIIDVTCCAj2gAwIBAgIBATANBgkqhkiG9w0BAQsFADA3MRwwGgYDVQQKDBN2bWNv
+bmRvci5pcmlzLmFjLnVrMRcwFQYDVQQDDA5WTUNvbmRvciBDQSAwMDAeFw0xOTA4
+MTAxOTAwNDNaFw0yMDA4MDkxOTAwNDNaMDExHDAaBgNVBAoME3ZtY29uZG9yLmly
+aXMuYWMudWsxETAPBgNVBAMMCHVzZXIwMDAxMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEA22yRj8mku47TllICIU25H3YGerJeF+qPe5akRs81xLhyGv0U
+r3iEFlKN+nLbuMVskfC0PHc/D6YCQi0CMiieEkN3OYVi8hfqe8vORzn5Erx68s2B
+kg2l/TyqPVwLywurrwm6RUwEnTlQYjOaJs17B4icaykmHzb44z8oGZyRzZz3I+Xu
+TDzhjI+RgHlnPRg7NcevEFnGziU9Cjtmag3jCGtV1S7uT+q6GcCBvvwGH+SJeqDl
+i3VryEDiEGrBRsTaEFo9pyvc2cV6oSVXjzeZ8SRKW+xUOr4olq8KTK+tp3tad9CY
+zjVtSU9g4WoVmhzZv6Rhz5t6nRK7WAqxtpqKEQIDAQABo3IwcDAJBgNVHRMEAjAA
+MA4GA1UdDwEB/wQEAwIEsDATBgNVHSUEDDAKBggrBgEFBQcDAjAdBgNVHQ4EFgQU
+QMcG2swal4ocNAyGONsfWM9ULwMwHwYDVR0jBBgwFoAU7Gamq+saKvDy6r5L12zE
+M5VYm6IwDQYJKoZIhvcNAQELBQADggEBAIo6VBVcCmj34EXsK2qx15H3RkgoM1vZ
+1CqHP/MxMZP7g+dmdlbP44mYkuUO+Pqzia2jR4HojuHmzVgyN8Vt//ImwLWgy1pQ
+zn0tATAqVRCiqgblT7Xj108FmS9kCU12qZxZX5WVBKPKA0x1bUbVeTYA0mSmsDrh
+LN9BWb7blarY818CqDr/TukGsbwGnhVD9CbG4KD6RdunpHS+jdAP9mAft9QwmHQe
+riJyGIB9k7e/t5tZgMAowvQuO+VLwIsW4kHgBlgEpSy+BeclsFeDkR7YiYVwLkNj
+iTquO99iRWrEJk4cHMQIOAom1fJtcpAefmdCBIoNMem8T8bJH/SAQRQ=
+-----END CERTIFICATE-----
+EOF
+
+ cat <<EOF >$VMCONDOR_DIR/certificates/VMCondorCA00.signing_policy
+#
+ access_id_CA   X509    '/O=vmcondor.iris.ac.uk/CN=VMCondor CA 00'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/O=vmcondor.iris.ac.uk/*"'
+EOF
+
+ ( cd $VMCONDOR_DIR/certificates
+   ln -sf VMCondorCA00.pem `openssl x509 -in VMCondorCA00.pem -hash -noout`.0 
+   ln -sf VMCondorCA00.signing_policy `openssl x509 -in VMCondorCA00.pem -hash -noout`.signing_policy )
+ 
+ if [ ! -s $VMCONDOR_DIR/vmcondor.key ] ; then
+   (
+     umask 066
+     openssl req -newkey rsa:2048 -keyout $VMCONDOR_DIR/key.pem -subj '/CN=VMCondor Request' -nodes -out $VMCONDOR_DIR/req.pem 2>/dev/null
+
+#     ( 
+#       cat <<EOF
+#POST /vmcondor-ca-cgi HTTP/1.1
+#Host: vmcondor.iris.ac.uk
+#User-Agent: vmcondor_setup $VMCONDOR_VERSION
+#
+#EOF
+#       cat $VMCONDOR_DIR/req.pem 
+#
+#     ) | openssl s_client -crlf -CApath $VMCONDOR_DIR/certificates -connect vmcondor.iris.ac.uk:443 >$VMCONDOR_DIR/cert.pem
+       
+     curl --silent --show-error \
+          --capath $VMCONDOR_DIR/certificates \
+          --upload-file $VMCONDOR_DIR/req.pem \
+          --output $VMCONDOR_DIR/cert.pem \
+          https://vmcondor.iris.ac.uk/vmcondor-ca-cgi
+
+     if [ -s $VMCONDOR_DIR/key.pem -a -s $VMCONDOR_DIR/cert.pem ] ; then
+       cat $VMCONDOR_DIR/cert.pem  $VMCONDOR_DIR/key.pem > $VMCONDOR_DIR/vmcondor.key
+       echo "Created $VMCONDOR_DIR/vmcondor.key"
+       echo "User is" `openssl x509 -in $VMCONDOR_DIR/vmcondor.key -subject -noout  2>/dev/null | sed 's:^.*/CN=::'`
+     fi
+
+     rm -f $VMCONDOR_DIR/key.pem $VMCONDOR_DIR/req.pem $VMCONDOR_DIR/cert.pem
+   )
+ fi
+
  cd `dirname $0`
  
  for i in $VMCONDOR_COMMANDS
  do
-   ln -sf vmcondor_setup $i
+   if [ ! -f $i ] ; then
+     echo "Adding $i command in $PWD"
+     ln -sf vmcondor_setup $i
+   fi
  done
 
- mkdir -p $VMCONDOR_DIR
  cat <<EOF >$VMCONDOR_DIR/vmcondor_config
 # Do not edit! Created by vmcondor_setup
 CONDOR_HOST = vmcondor.iris.ac.uk

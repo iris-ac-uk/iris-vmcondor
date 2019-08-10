@@ -1,0 +1,103 @@
+#!/usr/bin/python
+
+import os
+import sys
+import time
+import random
+import tempfile
+import M2Crypto
+
+archivedDir = '/var/lib/vmcondor-ca/archived'
+incomingDir = '/var/lib/vmcondor-ca/incoming'
+approvedDir = '/var/lib/vmcondor-ca/approved'
+
+def getRequest():  
+  return M2Crypto.X509.load_request_bio(M2Crypto.BIO.MemoryBuffer(sys.stdin.read()))
+
+def createArchivedFile():
+
+  lastUsername = sorted(['user0000'] + os.listdir(archivedDir))[-1]
+
+  for i in xrange(1,10):
+    try:
+      newUsername = 'user%04d' % (int(lastUsername[4:]) + i)
+      fd = os.open(archivedDir + '/' + newUsername, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except Exception as e:
+      print str(e)
+      continue
+    else:
+      os.write(fd, 'UNIX_TIME=%d\n' % int(time.time()))
+      os.write(fd, 'DATE_TIME=%s UTC\n' % time.asctime(time.gmtime()))
+    
+      for header in ('HTTP_USER_AGENT', 'REMOTE_ADDR', 'REMOTE_HOST'):
+        try:
+          os.write(fd, '%s=%s\n' % (header, os.environ[header]))
+        except:
+          pass
+
+      os.close(fd)
+      return newUsername
+      
+  raise Exception('Unable to create archived file')
+
+def createIncomingFile(newUsername):
+
+  contents = open(archivedDir + '/' + newUsername, 'r').read()
+
+  fd = os.open(incomingDir + '/' + newUsername, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+  os.write(fd, contents)
+  os.close(fd)    
+
+def makeCert(username, req):
+
+  newCert = M2Crypto.X509.X509()
+  newCert.set_serial_number(int(username[4:]))
+  newCert.set_version(2)
+  newCert.set_pubkey(req.get_pubkey())
+
+  subject    = M2Crypto.X509.X509_Name()
+  subject.O  = 'vmcondor.iris.ac.uk'
+  subject.CN = username
+  newCert.set_subject(subject)
+
+  caCert = M2Crypto.X509.load_cert('/etc/grid-security/VMCondorCA00.pem')
+  newCert.set_issuer(caCert.get_issuer())
+
+  notBefore = M2Crypto.m2.x509_get_not_before(newCert.x509)
+  notAfter  = M2Crypto.m2.x509_get_not_after(newCert.x509)
+  M2Crypto.m2.x509_gmtime_adj(notBefore, 0)
+  M2Crypto.m2.x509_gmtime_adj(notAfter, 60*60*24*365)
+
+  newCert.add_ext(M2Crypto.X509.new_extension('basicConstraints', 'CA:FALSE', 1))
+  newCert.add_ext(M2Crypto.X509.new_extension('keyUsage', 'Digital Signature, Key Encipherment, Data Encipherment', 1))
+  newCert.add_ext(M2Crypto.X509.new_extension('extendedKeyUsage', 'TLS Web Client Authentication', 1))
+
+  caKey = M2Crypto.RSA.load_key('/etc/grid-security/VMCondorCA00key.pem')
+  caKeyEVP = M2Crypto.EVP.PKey()
+  caKeyEVP.assign_rsa(caKey)
+  newCert.sign(caKeyEVP, 'sha256')
+  
+  return newCert
+
+#
+# PROGRAM MAIN
+#
+
+try:
+  req = getRequest()
+except:
+  print 'Status: 500 Failed to read request'
+  print
+  sys.exit(0)
+
+username  = createArchivedFile()
+createIncomingFile(username)
+newCert  = makeCert(username, req)
+
+print 'Status: 200 OK'
+print 'Content-Type: text/plain'
+print
+print newCert.as_text()
+print newCert.as_pem()
+
+sys.exit(0)
