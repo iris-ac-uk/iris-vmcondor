@@ -48,7 +48,8 @@ condor:
   UPDATE_INTERVAL: 60
   USE_SHARED_PORT: FALSE
   USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
-  VacuumSpace: '"##user_data_space##"'
+  VMCondorSite: '"##user_data_site##"'
+  VMCondorSpace: '"##user_data_space##"'
 #
 # Any per-VO settings are appended here 
 # from the XXXX.condor file

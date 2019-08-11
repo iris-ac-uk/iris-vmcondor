@@ -44,6 +44,12 @@ export VMCONDOR_COMMANDS='vmcondor_version vmcondor_submit vmcondor_q vmcondor_s
 BASENAME=`basename $0`
 if [ "$BASENAME" = "vmcondor_version" ] ; then
  echo "\$VMCondorVersion: $VMCONDOR_VERSION \$"
+ if [ -r "$VMCONDOR_DIR/vmcondor.key" ] ; then
+   echo "\$VMCondor key file is $VMCONDOR_DIR/vmcondor.key \$"
+   username=`openssl x509 -in $VMCONDOR_DIR/vmcondor.key -subject -noout 2>/dev/null | sed 's:^.*/CN=::'`
+   notAfter=`openssl x509 -in $VMCONDOR_DIR/vmcondor.key -enddate -noout 2>/dev/null | sed 's/^.*=//'`
+   echo "\$VMCondor username is $username and key expires on $notAfter \$"
+ fi
  exec condor_version
 elif [ "$BASENAME" = "vmcondor_submit" ] ; then
  exec condor_submit -pool $VMCONDOR_HOST -remote vmcondor@$VMCONDOR_HOST $*
@@ -211,7 +217,6 @@ EOF
      if [ -s $VMCONDOR_DIR/key.pem -a -s $VMCONDOR_DIR/cert.pem ] ; then
        username=`openssl x509 -in $VMCONDOR_DIR/cert.pem -subject -noout 2>/dev/null | sed 's:^.*/CN=::'`
        notAfter=`openssl x509 -in $VMCONDOR_DIR/cert.pem -enddate -noout 2>/dev/null | sed 's/^.*=//'`
-       echo "$username" > $VMCONDOR_DIR/username
        echo -e "VMCondor key for username $username\nExpires on $notAfter\n" > $VMCONDOR_DIR/description.txt
        cat $VMCONDOR_DIR/description.txt $VMCONDOR_DIR/cert.pem  $VMCONDOR_DIR/key.pem > $VMCONDOR_DIR/vmcondor.key
      
