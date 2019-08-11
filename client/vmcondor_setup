@@ -29,10 +29,10 @@
 #  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-#  Contacts: Andrew.McNab@cern.ch
+#  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-export VMCONDOR_VERSION=00.00.01
+export VMCONDOR_VERSION=00.01
 export VMCONDOR_HOST=vmcondor.iris.ac.uk
 export VMCONDOR_DIR=$HOME/.vmcondor
 export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
@@ -60,6 +60,21 @@ elif [ "$BASENAME" = "vmcondor_status" ] ; then
 elif [ "$BASENAME" = "vmcondor_transfer_data" ] ; then 
  exec condor_transfer_data -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
 else
+ (
+   cd `dirname $0`
+ 
+   for i in $VMCONDOR_COMMANDS
+   do
+     if [ ! -f $i ] ; then
+       echo "Adding $i command in $PWD"
+       ln -sf vmcondor_setup $i
+     fi
+   done
+ )
+
+ if [ "$1" = "--just-symlinks" ] ; then
+   exit 0
+ fi
 
  if [ ! -d $VMCONDOR_DIR ] ; then
    echo "Creating $VMCONDOR_DIR"
@@ -235,16 +250,6 @@ EOF
      rm -f $VMCONDOR_DIR/description.txt $VMCONDOR_DIR/key.pem $VMCONDOR_DIR/req.pem $VMCONDOR_DIR/cert.pem
    )
  fi
-
- cd `dirname $0`
- 
- for i in $VMCONDOR_COMMANDS
- do
-   if [ ! -f $i ] ; then
-     echo "Adding $i command in $PWD"
-     ln -sf vmcondor_setup $i
-   fi
- done
 
  cat <<EOF >$VMCONDOR_DIR/vmcondor_config
 # Do not edit! Created by vmcondor_setup

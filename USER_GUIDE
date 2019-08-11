@@ -1,0 +1,5 @@
+VMCondor User's Guide
+=====================
+
+VMCondor allows users to submit HTCondor batch jobs to a pool of virtual 
+machines managed by Vcycle/OpenStack or Vac at IRIS sites.

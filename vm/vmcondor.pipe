@@ -3,7 +3,7 @@
   "machinetypes": 
   [
    {
-    "suffix": "vmcondor",
+    "suffix": "prod",
     "accounting_fqan": "/iris.ac.uk/Role=NULL/Capability=NULL",
     "backoff_seconds": 600,
     "fizzle_seconds": 600,
@@ -13,8 +13,8 @@
     "min_wallclock_seconds": 86400,
     "max_wallclock_seconds": 90000,
     "max_processors": 1,
-    "root_image": "https://repo.gridpp.ac.uk/vacproject/atlas/cernvm4.iso",
-    "target_share": 0.0,
+    "root_image": "https://repo.iris.ac.uk/iris-vmcondor/cernvm4.iso",
+    "target_share": 1,
     "user_data": "https://repo.iris.ac.uk/iris-vmcondor/user_data",
     "user_data_proxy": "true"
    }
