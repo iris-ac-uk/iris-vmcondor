@@ -123,10 +123,6 @@ condor:
   USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
   VMCondorSite: '"##user_data_site##"'
   VMCondorSpace: '"##user_data_space##"'
-#
-# Any per-VO settings are appended here 
-# from the XXXX.condor file
-#
   CONDOR_HOST: vmcondor.iris.ac.uk
 
 --===============1638429754541547438==
@@ -198,11 +194,6 @@ fi
 # We didn't start at boot time, to allow /tmp/x509proxy.pem creation etc
 echo 'START = TRUE' >>/etc/condor/condor_config.local
 
-# In case the VO needs to update Condor configuration with a script
-if [ -x /usr/local/bin/condor_config_script ] ; then
-  /usr/local/bin/condor_config_script
-fi
-
 # Apply the updated configuration
 condor_reconfig
 
@@ -227,11 +218,6 @@ if [ ! -s /var/log/condor/startd_history ] ; then
   echo '300 No HTCondor job to run' > /var/spool/joboutputs/shutdown_message
 else
   echo '200 Success' > /var/spool/joboutputs/shutdown_message
-fi
-
-# If VO provides something else, run that too
-if [ -x /usr/local/bin/make_shutdown_message ] ; then
-  /usr/local/bin/make_shutdown_message
 fi
 
 # Time to upload and shutdown
