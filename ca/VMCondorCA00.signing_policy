@@ -1,0 +1,4 @@
+# VMCondorCA
+ access_id_CA   X509    '/O=vmcondor.iris.ac.uk/CN=VMCondor CA 00'
+ pos_rights     globus  CA:sign
+ cond_subjects  globus  '"/O=vmcondor.iris.ac.uk/*"'

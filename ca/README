@@ -1,0 +1,15 @@
+Files for creating the private certificate authority cert and key for VMCondor.
+
+The files VMCondorCA00.pem and VMCondorCA00key.pem are produced which
+must be installed in various places:
+
+- Both files on the VMCondor server in /etc/grid-security for 
+  vmcondor-ca-cgi to use
+- VMCondorCA00.pem and VMCondorCA00.signing_policy in 
+  /etc/grid-security/certificates for the GSI subsystem of the HTCondor
+  server to use
+- Symbolic links XXXXXXX.0 and XXXXXXX.signing_policy must also be created in 
+  /etc/grid-security/certificates where XXXXXXX is from
+  openssl x509 -in VMCondorCA00.pem -noout -hash
+- ./client/vmcondor_setup in this repository must be modified to create
+  VMCondorCA00.pem and hash in $HOME/.vmcondor/certificates 
