@@ -1,8 +1,40 @@
 #!/bin/sh
+#
+#  Andrew McNab, University of Manchester.
+#  Copyright (c) 2013-9. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or
+#  without modification, are permitted provided that the following
+#  conditions are met:
+#
+#    o Redistributions of source code must retain the above
+#      copyright notice, this list of conditions and the following
+#      disclaimer. 
+#    o Redistributions in binary form must reproduce the above
+#      copyright notice, this list of conditions and the following
+#      disclaimer in the documentation and/or other materials
+#      provided with the distribution. 
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+#  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+#  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+#  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+#  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+#  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+#  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+#  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+#  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+#  Contacts: Andrew.McNab@cern.ch
+#
 
 export VMCONDOR_VERSION=00.00.01
 export VMCONDOR_HOST=vmcondor.iris.ac.uk
-export VMCONDOR_DIR=$HOME/dot.vmcondor
+export VMCONDOR_DIR=$HOME/.vmcondor
 export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
 export X509_USER_CERT=$VMCONDOR_DIR/vmcondor.key
 export X509_USER_KEY=$VMCONDOR_DIR/vmcondor.key
@@ -12,7 +44,7 @@ export VMCONDOR_COMMANDS='vmcondor_version vmcondor_submit vmcondor_q vmcondor_s
 BASENAME=`basename $0`
 if [ "$BASENAME" = "vmcondor_version" ] ; then
  echo "\$VMCondorVersion: $VMCONDOR_VERSION \$"
-q exec condor_version
+ exec condor_version
 elif [ "$BASENAME" = "vmcondor_submit" ] ; then
  exec condor_submit -pool $VMCONDOR_HOST -remote vmcondor@$VMCONDOR_HOST $*
 elif [ "$BASENAME" = "vmcondor_q" ] ; then
@@ -177,12 +209,25 @@ EOF
           https://vmcondor.iris.ac.uk/vmcondor-ca-cgi
 
      if [ -s $VMCONDOR_DIR/key.pem -a -s $VMCONDOR_DIR/cert.pem ] ; then
-       cat $VMCONDOR_DIR/cert.pem  $VMCONDOR_DIR/key.pem > $VMCONDOR_DIR/vmcondor.key
-       echo "Created $VMCONDOR_DIR/vmcondor.key"
-       echo "User is" `openssl x509 -in $VMCONDOR_DIR/vmcondor.key -subject -noout  2>/dev/null | sed 's:^.*/CN=::'`
+       username=`openssl x509 -in $VMCONDOR_DIR/cert.pem -subject -noout 2>/dev/null | sed 's:^.*/CN=::'`
+       notAfter=`openssl x509 -in $VMCONDOR_DIR/cert.pem -enddate -noout 2>/dev/null | sed 's/^.*=//'`
+       echo "$username" > $VMCONDOR_DIR/username
+       echo -e "VMCondor key for username $username\nExpires on $notAfter\n" > $VMCONDOR_DIR/description.txt
+       cat $VMCONDOR_DIR/description.txt $VMCONDOR_DIR/cert.pem  $VMCONDOR_DIR/key.pem > $VMCONDOR_DIR/vmcondor.key
+     
+       echo "Your key has been placed in $VMCONDOR_DIR/vmcondor.key"
+       echo "Your VMCondor username is $username" 
+       echo
+       echo "To activate your account, send an email to vmcondor@iris.ac.uk stating"
+       echo " - your VMCondor username ($username)"
+       echo " - your preferred name"
+       echo " - your home institute"
+       echo " - your IRIS user community"
+       echo "within the next 7 days."
+       echo
      fi
 
-     rm -f $VMCONDOR_DIR/key.pem $VMCONDOR_DIR/req.pem $VMCONDOR_DIR/cert.pem
+     rm -f $VMCONDOR_DIR/description.txt $VMCONDOR_DIR/key.pem $VMCONDOR_DIR/req.pem $VMCONDOR_DIR/cert.pem
    )
  fi
 

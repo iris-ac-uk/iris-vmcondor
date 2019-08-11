@@ -97,7 +97,6 @@ newCert  = makeCert(username, req)
 print 'Status: 200 OK'
 print 'Content-Type: text/plain'
 print
-print newCert.as_text()
 print newCert.as_pem()
 
 sys.exit(0)
