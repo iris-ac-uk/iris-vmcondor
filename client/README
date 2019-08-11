@@ -11,5 +11,5 @@ VMCondor username approved by the operators of the VMCondor service.
 The vmcondor_setup command will also create symbolic links to the various
 VMCondor user commands (vmcondor_version vmcondor_submit vmcondor_q 
 vmcondor_status vmcondor_transfer_data) and populate $HOME/.vmcondor
-will other required configuration files and certificates.
+will other required configuration files.
 

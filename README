@@ -1,12 +1,12 @@
 VMCondor allows users to submit HTCondor batch jobs to a pool of virtual 
-machines managed by Vcycle/OpenStack or Vac at IRIS sites. Users are 
-automatically assigned VMCondor usernames and VMCondor key is created to
-allow authentication to the VMCondor server. There is no need for users
-to interact with X.509 certificates or run HTCondor daemons.
+machines managed by Vcycle/OpenStack or Vac at IRIS sites. The provided
+setup script automatically assigns a VMCondor username and creates a VMCondor
+key for connecting to the VMCondor server. There is no need for a user
+to request an X.509 certificate or run HTCondor daemons.
 
-This repository contais the following directories:
+This repository contains the following directories:
 
-- server, with files for the prototype VMCondor server operated by IRIS
 - client, with the script users need to install on their client machines
-- ca, with a script to generate certificates VMCondor uses internally
+- server, with files for the prototype VMCondor server operated by IRIS
+- vmcondor-ca, with a script to generate certificates VMCondor uses internally
 - vm, with files to define the VMCondor virtual machines which run jobs
