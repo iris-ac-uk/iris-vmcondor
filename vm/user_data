@@ -62,15 +62,12 @@ write_files:
         export HOME=`pwd`
         . /etc/profile
         . /etc/bashrc
-        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/a1_grid_env.sh
-        . /cvmfs/grid.cern.ch/emi3wn-latest/etc/profile.d/setup-wn-example.sh
+        . /cvmfs/grid.cern.ch/umd-c7wn-latest/etc/profile.d/setup-c7-wn-example.sh
         random=`/usr/bin/openssl rand -hex 16`
         ln _condor_stdout /scratch/joblogs/_condor_stdout.$random
         ln _condor_stderr /scratch/joblogs/_condor_stderr.$random
         exec $*
-#
-# Per-experiment write_files sections are appended here ...
-#
+
 condor:
   ALLOW_ADMINISTRATOR: $(FULL_HOSTNAME)
   ALLOW_DAEMON: $(ALLOW_WRITE)
@@ -81,7 +78,7 @@ condor:
   COLLECTOR_HOST: $(CONDOR_HOST)
   COLLECTOR_PORT: 9618
   CONDOR_ADMIN: root@$(CONDOR_HOST)
-  CONDOR_HOST: ##user_data_option_condor_host##
+  CONDOR_HOST: vmcondor.iris.ac.uk
   DAEMON_LIST: MASTER, STARTD 
   DEDICATED_EXECUTE_ACCOUNT_REGEXP: cndrusr[0-9]+
   ENABLE_SSH_TO_JOB: True
@@ -123,7 +120,6 @@ condor:
   USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
   VMCondorSite: '"##user_data_site##"'
   VMCondorSpace: '"##user_data_space##"'
-  CONDOR_HOST: vmcondor.iris.ac.uk
 
 --===============1638429754541547438==
 MIME-Version: 1.0
