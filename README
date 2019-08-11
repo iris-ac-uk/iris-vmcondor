@@ -1,34 +1,12 @@
-VMCondor: generic Cloud Init user_data template file for use with Vacuum
-based systems (Vac,Vcycle)
+VMCondor allows users to submit HTCondor batch jobs to a pool of virtual 
+machines managed by Vcycle/OpenStack or Vac at IRIS sites. Users are 
+automatically assigned VMCondor usernames and VMCondor key is created to
+allow authentication to the VMCondor server. There is no need for users
+to interact with X.509 certificates or run HTCondor daemons.
 
-make_VMCondor_user_data EXAMPLE  will make a user_data file with the name
-EXAMPLE.user_data including the EXAMPLE.condor and EXAMPLE.write_files if
-they exist.
+This repository contais the following directories:
 
-EXAMPLE.condor contains HTCondor configuration options which will be
-appended to the default VMCondor options and therefore take precdence
-over them.
-
-EXAMPLE.write_files contains one or more indented cloud-config sections
-to follow a write_files directive.
-
-If EXAMPLE.write_files creates the following optional scripts, they will
-be used by VMCondor:
-
-/usr/local/bin/user_job_wrapper is an HTCondor USER_JOB_WRAPPER which
-is run before each HTCondor job. The script must end with  exec "$*"
-If user_job_wrapper is not provided, then VMCondor will give HTCondor
-a default that approximates a WLCG worker node using scripts in cvmfs.
-
-/usr/local/bin/condor_config_script is run before VMCondor loads the
-final HTCondor configuration and HTCondor starts to run jobs.
-
-/usr/local/bin/make_shutdown_message is run after HTCondor has stopped
-running jobs. This script should parse the HTCondor job logs to 
-determine why HTCondor stopped: in particular, if it ran job(s) 
-successfully or didn't find any jobs to run.
-
-
-The Makefile includes some user_data file targets which run
-make_VMCondor_user_data with different write_files and condor files.
-
+- server, with files for the prototype VMCondor server operated by IRIS
+- client, with the script users need to install on their client machines
+- ca, with a script to generate certificates VMCondor uses internally
+- vm, with files to define the VMCondor virtual machines which run jobs

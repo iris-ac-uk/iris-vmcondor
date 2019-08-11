@@ -1,0 +1,15 @@
+vmcondor_setup script to be installed on VMCondor users' machines.
+
+vmcondor_setup depends on the openssl, curl and condor_* commands being
+available on the Unix $PATH. No system level configuration of HTCondor
+in /etc/condor is needed, and the HTCondor daemons should not be started.
+
+vmcondor_setup should be placed on the $PATH in a directory writeable by
+the user (eg $HOME/bin). When first run, vmcondor_setup will create a
+vmcondor.key file in $HOME/.vmcondor and invite the user to get their
+VMCondor username approved by the operators of the VMCondor service.
+The vmcondor_setup command will also create symbolic links to the various
+VMCondor user commands (vmcondor_version vmcondor_submit vmcondor_q 
+vmcondor_status vmcondor_transfer_data) and populate $HOME/.vmcondor
+will other required configuration files and certificates.
+
