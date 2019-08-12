@@ -38,15 +38,17 @@ RUN curl --output /root/RPM-GPG-KEY-HTCondor \
 RUN rpm --import /root/RPM-GPG-KEY-HTCondor
 RUN curl --output /etc/yum.repos.d/htcondor-stable-rhel7.repo \
       https://research.cs.wisc.edu/htcondor/yum/repo.d/htcondor-stable-rhel7.repo
-RUN yum -y install condor
+RUN yum -y --setopt=tsflags='' install condor
 
 # Repositories
-RUN yum -y install epel-release 
+RUN yum -y --setopt=tsflags='' install epel-release 
 
 # Packages we need or want
-RUN yum -y install emacs \
+RUN yum -y --setopt=tsflags='' install \
+                   emacs \
                    joe \
                    less \
+                   which \
                    man \
                    man-pages \
                    man-pages-overrides \
