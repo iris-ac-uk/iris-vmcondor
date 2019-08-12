@@ -1,6 +1,6 @@
 vmcondor_setup script to be installed on VMCondor users' machines.
 
-vmcondor_setup depends on the openssl, curl and condor_* commands being
+vmcondor_setup depends on the openssl and condor_* commands being
 available on the Unix $PATH. No system level configuration of HTCondor
 in /etc/condor is needed, and the HTCondor daemons should not be started.
 
