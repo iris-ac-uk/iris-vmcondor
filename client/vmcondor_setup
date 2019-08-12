@@ -170,29 +170,29 @@ EOF
  ( cd $VMCONDOR_DIR/certificates ; ln -sf UKeScienceCA-2B.pem `openssl x509 -in UKeScienceCA-2B.pem -hash -noout`.0 )
 
  cat <<EOF >$VMCONDOR_DIR/certificates/VMCondorCA00.pem
-subject= /O=vmcondor.iris.ac.uk/CN=user0001
+subject= /O=vmcondor.iris.ac.uk/CN=VMCondor CA 00
 issuer= /O=vmcondor.iris.ac.uk/CN=VMCondor CA 00
 notBefore=Aug 10 19:00:43 2019 GMT
-notAfter=Aug  9 19:00:43 2020 GMT
+notAfter=Aug  7 19:00:43 2029 GMT
 -----BEGIN CERTIFICATE-----
-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
+MIIDTDCCAjSgAwIBAgIBADANBgkqhkiG9w0BAQsFADA3MRwwGgYDVQQKDBN2bWNv
 bmRvci5pcmlzLmFjLnVrMRcwFQYDVQQDDA5WTUNvbmRvciBDQSAwMDAeFw0xOTA4
-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
+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
 -----END CERTIFICATE-----
 EOF
 
@@ -211,17 +211,6 @@ EOF
    (
      umask 066
      openssl req -newkey rsa:2048 -keyout $VMCONDOR_DIR/key.pem -subj '/CN=VMCondor Request' -nodes -out $VMCONDOR_DIR/req.pem 2>/dev/null
-
-#     ( 
-#       cat <<EOF
-#POST /vmcondor-ca-cgi HTTP/1.1
-#Host: vmcondor.iris.ac.uk
-#User-Agent: vmcondor_setup $VMCONDOR_VERSION
-#
-#EOF
-#       cat $VMCONDOR_DIR/req.pem 
-#
-#     ) | openssl s_client -crlf -CApath $VMCONDOR_DIR/certificates -connect vmcondor.iris.ac.uk:443 >$VMCONDOR_DIR/cert.pem
        
      curl --silent --show-error \
           --capath $VMCONDOR_DIR/certificates \
@@ -261,7 +250,7 @@ use SECURITY : HOST_BASED
 ALL_DEBUG = TRUE
 GSI_SKIP_HOST_CHECK_CERT_REGEX = .*
 DAEMON_LIST = 
-GSI_CLIENT_TRUSTED_CA_DIR = /etc/grid-security/certificates
+DEFAULT_UNIVERSE = vanilla
 EOF
 
  exit 0
