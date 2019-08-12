@@ -1,8 +1,8 @@
-To build: clone this repo and then execute
+
+To build: clone the repo and then execute
 
 make push
 
-------
 
 To create a container from the image, it is recommended to mount a volume
 at /home/user with the files you write. This should make it easier to move
@@ -11,11 +11,12 @@ to newer versions of the image whilst retaining your own files.
 On Linux or macOS, a command like this may be used to create and enter
 an iris-vmcondor Docker container as a non-privileged user:
 
+mkdir -p $HOME/iris-vmcondor-home
 docker run --user user --tty --interactive \
   --volume $HOME/iris-vmcondor-home:/home/user \
   --workdir /home/user irisacuk/iris-vmcondor:latest /bin/bash --login
 
-------
+The editors emacs, nano, joe, and vi are also installed.
 
-The editors emacs, nano, joe, and vi are also available.
-
+Please see https://github.com/iris-ac-uk/iris-vmcondor/wiki/Users-Guide
+for more about using VMCondor to submit jobs to IRIS.
