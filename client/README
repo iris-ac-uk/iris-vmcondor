@@ -13,3 +13,5 @@ VMCondor user commands (vmcondor_version vmcondor_submit vmcondor_q
 vmcondor_status vmcondor_transfer_data) and populate $HOME/.vmcondor
 will other required configuration files.
 
+See https://github.com/iris-ac-uk/iris-vmcondor/wiki/Users-Guide for
+more detailed instructions.

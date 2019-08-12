@@ -1,0 +1,8 @@
+Executable              = example.sh
+#Input			= example.stdin
+Output                  = example.stdout
+Error                   = example.stderr
++Owner                  = undefined
+Notification            = never
+When_To_Transfer_Output = on_exit
+Queue
