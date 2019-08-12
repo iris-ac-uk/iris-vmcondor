@@ -212,13 +212,19 @@ EOF
      umask 066
      openssl req -newkey rsa:2048 -keyout $VMCONDOR_DIR/key.pem -subj '/CN=VMCondor Request' -nodes -out $VMCONDOR_DIR/req.pem 2>/dev/null
 
-     ( echo -e 'POST /vmcondor-ca-cgi HTTP/1.1\nHost:vmcondor.iris.ac.uk\n'
-       cat $VMCONDOR_DIR/req.pem
-       sleep 5
-     ) | openssl s_client -connect vmcondor.iris.ac.uk:443 \
-                          -CApath $VMCONDOR_DIR/certificates \
-                          -quiet -no_ign_eof -crlf \
-                          >$VMCONDOR_DIR/cert.pem
+#     ( echo -e 'POST /vmcondor-ca-cgi HTTP/1.1\nHost:vmcondor.iris.ac.uk\n'
+#       cat $VMCONDOR_DIR/req.pem
+#       sleep 5
+#     ) | openssl s_client -connect vmcondor.iris.ac.uk:443 \
+#                          -CApath $VMCONDOR_DIR/certificates \
+#                          -quiet -no_ign_eof -crlf \
+#                          >$VMCONDOR_DIR/cert.pem
+
+     curl --silent --show-error \
+          --capath $VMCONDOR_DIR/certificates \
+          --upload-file $VMCONDOR_DIR/req.pem \
+          --output $VMCONDOR_DIR/cert.pem \
+          https://vmcondor.iris.ac.uk/vmcondor-ca-cgi
 
      if [ -s $VMCONDOR_DIR/key.pem -a -s $VMCONDOR_DIR/cert.pem ] ; then
        username=`openssl x509 -in $VMCONDOR_DIR/cert.pem -subject -noout 2>/dev/null | sed 's:^.*/CN=::'`

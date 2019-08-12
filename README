@@ -15,4 +15,4 @@ This repository contains the following directories:
 - vmcondor-ca, with a script to generate certificates VMCondor uses internally
 - vm, with files to define the VMCondor virtual machines which run jobs
 - docker-client, with files to define the irisacuk/iris-vmcondor Docker image
-  which contains OpenStack, HTCondor, and VMCondor commands
+  which contains OpenSSL, Curl, HTCondor, and VMCondor commands

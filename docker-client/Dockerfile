@@ -53,6 +53,7 @@ RUN yum -y --setopt=tsflags='' install \
                    man-pages \
                    man-pages-overrides \
                    nano \
+                   curl \
                    openssl \
                    wget
 
