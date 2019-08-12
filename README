@@ -4,8 +4,8 @@ setup script automatically assigns a VMCondor username and creates a key
 for connecting to the VMCondor server. There is no need for a user
 to request an X.509 certificate or run HTCondor daemons.
 
-See the Users' and Sites' Guides in the Wiki for explanations of how to submit
-jobs to VMCondor and how sites can provide capacity to the pool:
+See the Users' and Sites' Guides in the Wiki for explanations of how to 
+submit jobs to VMCondor and how sites can provide capacity to the pool:
 https://github.com/iris-ac-uk/iris-vmcondor/wiki
 
 This repository contains the following directories:
