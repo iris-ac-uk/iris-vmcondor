@@ -49,6 +49,7 @@ fi
 
 (
 
+  echo "FQAN=/iris.ac.uk/Role=NULL/Capability=NULL"
   echo "EMAIL=$2"
   cat "/var/lib/vmcondor-ca/incoming/$1"
 
