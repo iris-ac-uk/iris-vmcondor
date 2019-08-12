@@ -55,6 +55,8 @@ fi
 
 ) > "/var/lib/vmcondor-ca/approved/$1"
 
+rm -f "/var/lib/vmcondor-ca/incoming/$1"
+
 newUID=1`echo "$1" | cut -c5-8`
 
 useradd --home-dir /var/lib/condor --comment "VMCondor $1" --no-create-home --shell /sbin/nologin --uid $newUID  "$1"
