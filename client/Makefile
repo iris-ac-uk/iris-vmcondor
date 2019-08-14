@@ -1,4 +1,3 @@
-#!/bin/sh
 #
 #  Andrew McNab, University of Manchester.
 #  Copyright (c) 2013-9. All rights reserved.
@@ -29,52 +28,39 @@
 #  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 #  POSSIBILITY OF SUCH DAMAGE.
 #
-#  Contacts: Andrew.McNab@cern.ch
+#  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-if [ "$1" = "" -o "$2" = "" ] ; then
-  echo vmcondor-approve USERNAME EMAIL@ADDRESS
-  exit 0
-fi
+include RPM_VERSION
 
-if [ -s "/var/lib/vmcondor-ca/approved/$1" ] ; then
-  echo "/var/lib/vmcondor-ca/approved/$1 already exists!"
-  exit 1
-fi
+INSTALL_FILES=vmcondor_setup example.sub example.sh \
+          
+TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec RPM_VERSION
 
-if [ ! -s "/var/lib/vmcondor-ca/incoming/$1" ] ; then
-  echo "/var/lib/vmcondor-ca/incoming/$1 does not exist!"
-  exit 1
-fi
+GNUTAR ?= tar
+vmcondor-client.tgz: $(TGZ_FILES)
+	mkdir -p TEMPDIR/vmcondor-client
+	cp $(TGZ_FILES) TEMPDIR/vmcondor-client
+	cd TEMPDIR ; $(GNUTAR) zcvf ../vmcondor-client.tgz --owner=root --group=root vmcondor-client
+	rm -R TEMPDIR
 
-(
-  echo "FQAN=/iris.ac.uk/Role=NULL/Capability=NULL"
-  echo "EMAIL=$2"
-  cat "/var/lib/vmcondor-ca/incoming/$1"
-
-) > "/var/lib/vmcondor-ca/approved/$1"
-
-rm -f "/var/lib/vmcondor-ca/incoming/$1"
-
-newUID=1`echo "$1" | cut -c5-8`
-
-useradd --home-dir /var/lib/condor --comment "VMCondor $1" --no-create-home --shell /sbin/nologin --uid $newUID  "$1"
-
-(
-  cd /var/lib/vmcondor-ca/approved
-
-  echo '# DO NOT EDIT - CREATED BY vmcondor-approve'
-  echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=iris-vm.blackett.manchester.ac.uk" condor'
-  echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=andrew mcnab" condor'
-
-  for username in `ls | grep '^user[0-9][0-9][0-9][0-9]$'`
-  do
-    echo 'GSI "/O=vmcondor.iris.ac.uk/CN='${username}'" '${username}
-  done
-) > /etc/condor/certificate_mapfile.tmp
-
-mv -f /etc/condor/certificate_mapfile.tmp /etc/condor/certificate_mapfile
-
-condor_reconfig -name "$HOSTNAME"
-
-
+install: $(INSTALL_FILES)
+	mkdir -p $(RPM_BUILD_ROOT)/usr/bin \
+	         $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
+	cp vmcondor_setup \
+	   $(RPM_BUILD_ROOT)/usr/bin
+	cp RPM_VERSION \
+	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client/VERSION
+	cp example.sub example.sh \
+	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
+	$(RPM_BUILD_ROOT)/usr/bin/vmcondor_setup --just-symlinks
+	
+rpm: vmcondor-client.tgz
+	rm -Rf RPMTMP
+	mkdir -p RPMTMP/SOURCES RPMTMP/SPECS RPMTMP/BUILD \
+         RPMTMP/SRPMS RPMTMP/RPMS/noarch RPMTMP/BUILDROOT
+	cp -f vmcondor-client.tgz RPMTMP/SOURCES
+	export RPM_VERSION=$(VERSION) ; rpmbuild -ba \
+	  --define "_topdir $(shell pwd)/RPMTMP" \
+	  --buildroot $(shell pwd)/RPMTMP/BUILDROOT \
+	  vmcondor-client.spec

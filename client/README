@@ -4,6 +4,11 @@ vmcondor_setup depends on the openssl, curl and condor_* commands being
 available on the Unix $PATH. No system level configuration of HTCondor
 in /etc/condor is needed, and the HTCondor daemons should not be started.
 
+See https://github.com/iris-ac-uk/iris-vmcondor/wiki/Users-Guide for
+more detailed instructions.
+
+1) Manual install
+
 vmcondor_setup should be placed on the $PATH in a directory writeable by
 the user (eg $HOME/bin). When first run, vmcondor_setup will create a
 vmcondor.key file in $HOME/.vmcondor and invite the user to get their
@@ -13,5 +18,8 @@ VMCondor user commands (vmcondor_version vmcondor_submit vmcondor_q
 vmcondor_status vmcondor_transfer_data) and populate $HOME/.vmcondor
 will other required configuration files.
 
-See https://github.com/iris-ac-uk/iris-vmcondor/wiki/Users-Guide for
-more detailed instructions.
+2) RPM install
+
+The vmcondor-client RPM can be used to install vmcondor_setup . The
+files example.sub and example.sh mentioned in the Users Guide are 
+installed in /usr/lib/vmcondor-client/
