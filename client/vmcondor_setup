@@ -224,7 +224,7 @@ EOF
           --capath $VMCONDOR_DIR/certificates \
           --upload-file $VMCONDOR_DIR/req.pem \
           --output $VMCONDOR_DIR/cert.pem \
-          https://vmcondor.iris.ac.uk/vmcondor-ca-cgi
+          https://vmcondor-ca.iris.ac.uk/vmcondor-ca-cgi
 
      if [ -s $VMCONDOR_DIR/key.pem -a -s $VMCONDOR_DIR/cert.pem ] ; then
        username=`openssl x509 -in $VMCONDOR_DIR/cert.pem -subject -noout 2>/dev/null | sed 's:^.*/CN=::'`

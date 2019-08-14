@@ -40,7 +40,7 @@
 #  The hostnames and perhaps port numbers in this file must be replaced
 #  with the correct values for your service.
 #
-#  Place vmcondor.cert.pem and vmcondor.key.pem in /etc/grid-security
+#  Place vmcondor-ca cert and key in /etc/grid-security
 #  and install the CA files in /etc/grid-security/certificates
 #
 #  If necessary, you can do this with:
@@ -60,27 +60,27 @@
 #    httpd to access the paths in this file
 
 <VirtualHost *:80>
-ServerName vmcondor.iris.ac.uk
+ServerName vmcondor-ca.iris.ac.uk
 DocumentRoot "/var/www/html"
 
-CustomLog logs/http--vmcondor.iris.ac.uk.log combined
+CustomLog logs/http--vmcondor-ca.iris.ac.uk.log combined
 
 </VirtualHost>
 
-<VirtualHost vmcondor.iris.ac.uk:443>
-ServerName vmcondor.iris.ac.uk
+<VirtualHost vmcondor-ca.iris.ac.uk:443>
+ServerName vmcondor-ca.iris.ac.uk
 DocumentRoot "/var/www/html"
 
 SSLEngine               on
-SSLCertificateFile      /etc/grid-security/vmcondor.iris.ac.uk.cert.pem
-SSLCertificateKeyFile   /etc/grid-security/vmcondor.iris.ac.uk.key.pem
+SSLCertificateFile      /etc/grid-security/vmcondor-ca.iris.ac.uk.cert.pem
+SSLCertificateKeyFile   /etc/grid-security/vmcondor-ca.iris.ac.uk.key.pem
 SSLCACertificatePath    /etc/grid-security/certificates
 #SSLCARevocationPath    YOUR CRL DIRECTORY WOULD GO HERE
 SSLVerifyClient         optional
 SSLVerifyDepth          10
 SSLOptions              +StdEnvVars
 
-CustomLog logs/https-vmcondor.iris.ac.uk.log combined
+CustomLog logs/https-vmcondor-ca.iris.ac.uk.log combined
 
 ScriptAlias /vmcondor-ca-cgi /usr/local/sbin/vmcondor-ca-cgi
 Script PUT /vmcondor-ca-cgi
