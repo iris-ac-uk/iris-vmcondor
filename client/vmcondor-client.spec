@@ -1,5 +1,5 @@
 Name: vmcondor-client
-Version: %(echo ${RPM_VERSION:-0.0})
+Version: %(echo ${VMCONDOR_VERSION:-0.0})
 Release: 1
 BuildArch: noarch
 Summary: vmcondor-client

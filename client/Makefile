@@ -31,11 +31,11 @@
 #  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-include RPM_VERSION
+include VMCONDOR_VERSION
 
 INSTALL_FILES=vmcondor_setup example.sub example.sh \
           
-TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec RPM_VERSION
+TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec VMCONDOR_VERSION
 
 GNUTAR ?= tar
 vmcondor-client.tgz: $(TGZ_FILES)
@@ -49,8 +49,8 @@ install: $(INSTALL_FILES)
 	         $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
 	cp vmcondor_setup \
 	   $(RPM_BUILD_ROOT)/usr/bin
-	cp RPM_VERSION \
-	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client/VERSION
+	cp VMCONDOR_VERSION \
+	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
 	cp example.sub example.sh \
 	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
 	$(RPM_BUILD_ROOT)/usr/bin/vmcondor_setup --just-symlinks
@@ -60,7 +60,7 @@ rpm: vmcondor-client.tgz
 	mkdir -p RPMTMP/SOURCES RPMTMP/SPECS RPMTMP/BUILD \
          RPMTMP/SRPMS RPMTMP/RPMS/noarch RPMTMP/BUILDROOT
 	cp -f vmcondor-client.tgz RPMTMP/SOURCES
-	export RPM_VERSION=$(VERSION) ; rpmbuild -ba \
+	export VMCONDOR_VERSION=$(VMCONDOR_VERSION) ; rpmbuild -ba \
 	  --define "_topdir $(shell pwd)/RPMTMP" \
 	  --buildroot $(shell pwd)/RPMTMP/BUILDROOT \
 	  vmcondor-client.spec
