@@ -57,12 +57,24 @@ RUN yum -y --setopt=tsflags='' install \
                    openssl \
                    wget
 
+# Install vmcondor_setup and vmcondor_* commands
 COPY copy.of.vmcondor_setup /usr/local/bin/vmcondor_setup
-
 RUN /usr/local/bin/vmcondor_setup --just-symlinks
 
+# Add example files and VERSION 
+RUN mkdir -p /usr/lib/vmcondor
+COPY copy.of.example.sub /usr/lib/vmcondor/example.sub
+COPY copy.of.example.sh  /usr/lib/vmcondor/example.sh
+COPY VERSION             /usr/lib/vmcondor/VERSION
+
+# Add $HOME/bin to path in case user installs new version manually
 RUN echo -e 'export PATH=$HOME/bin:$PATH\nexport PS1="vmcondor.\u: "' > /etc/profile.d/vmcondor.sh
 RUN echo -e 'setenv PATH $HOME/bin:$PATH\nset prompt "vmcondor.%n: "' > /etc/profile.d/vmcondor.csh
 
 # Add a non-privileged user
 RUN useradd --create-home --skel /dev/null user
+
+# Set default workdir, user and command for the image
+WORKDIR /home/user
+USER user
+CMD /bin/bash --login

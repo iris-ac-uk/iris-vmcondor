@@ -35,8 +35,10 @@ include VERSION
 
 iris-vmcondor: Dockerfile VERSION
 	cp ../client/vmcondor_setup copy.of.vmcondor_setup
+	cp ../client/example.sub copy.of.example.sub
+	cp ../client/example.sh copy.of.example.sh
 	docker build -t iris-vmcondor:$(VERSION) .
-	rm -f copy.of.vmcondor_setup
+	rm -f copy.of.*
 
 push: iris-vmcondor
 	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:$(VERSION)
