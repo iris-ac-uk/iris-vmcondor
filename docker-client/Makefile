@@ -31,17 +31,17 @@
 #  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk
 #
 
-include VERSION
+include DOCKER_VERSION
 
-iris-vmcondor: Dockerfile VERSION
+iris-vmcondor: Dockerfile DOCKER_VERSION
 	cp ../client/vmcondor_setup copy.of.vmcondor_setup
 	cp ../client/example.sub copy.of.example.sub
 	cp ../client/example.sh copy.of.example.sh
-	docker build -t iris-vmcondor:$(VERSION) .
+	docker build -t iris-vmcondor:$(DOCKER_VERSION) .
 	rm -f copy.of.*
 
 push: iris-vmcondor
-	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:$(VERSION)
-	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:latest
-	docker push irisacuk/iris-vmcondor:$(VERSION)
+	docker tag iris-vmcondor:$(DOCKER_VERSION) irisacuk/iris-vmcondor:$(DOCKER_VERSION)
+	docker tag iris-vmcondor:$(DOCKER_VERSION) irisacuk/iris-vmcondor:latest
+	docker push irisacuk/iris-vmcondor:$(DOCKER_VERSION)
 	docker push irisacuk/iris-vmcondor:latest
