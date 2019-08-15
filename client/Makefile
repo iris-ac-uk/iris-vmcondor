@@ -33,18 +33,16 @@
 
 include ../VERSION
 
-INSTALL_FILES=vmcondor_setup example.sub example.sh 
-          
-TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec ../VERSION
+TGZ_FILES=vmcondor_setup example.sub example.sh vmcondor-client.spec ../VERSION
 
 GNUTAR ?= tar
-vmcondor-client.tgz: $(TGZ_FILES) rpm-Makefile
+vmcondor-client.tgz: $(TGZ_FILES) rpm-Makefile Makefile
 	mkdir -p TEMPDIR/vmcondor-client
 	cp $(TGZ_FILES) TEMPDIR/vmcondor-client
-	cp rpm-Makefile TEMPDIR/Makefile
+	cp rpm-Makefile TEMPDIR/vmcondor-client/Makefile
 	cd TEMPDIR ; $(GNUTAR) zcvf ../vmcondor-client.tgz --owner=root --group=root vmcondor-client
 	rm -R TEMPDIR
-	
+
 rpm-build: vmcondor-client.tgz
 	rm -Rf RPMTMP
 	mkdir -p RPMTMP/SOURCES RPMTMP/SPECS RPMTMP/BUILD \

@@ -31,8 +31,6 @@
 #  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-include VERSION
-
 install:
 	mkdir -p $(RPM_BUILD_ROOT)/usr/bin \
 	         $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
