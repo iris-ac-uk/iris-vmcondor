@@ -65,7 +65,7 @@ RUN /usr/local/bin/vmcondor_setup --just-symlinks
 RUN mkdir -p /usr/lib/vmcondor-client
 COPY copy.of.example.sub /usr/lib/vmcondor-client/example.sub
 COPY copy.of.example.sh  /usr/lib/vmcondor-client/example.sh
-COPY DOCKER_VERSION      /usr/lib/vmcondor-client/VERSION
+COPY copy.of.VERSION     /usr/lib/vmcondor-client/VERSION
 
 # Add $HOME/bin to path in case user installs new version manually
 RUN echo -e 'export PATH=$HOME/bin:$PATH\nexport PS1="vmcondor.\u: "' > /etc/profile.d/vmcondor.sh

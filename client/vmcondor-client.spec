@@ -1,5 +1,5 @@
 Name: vmcondor-client
-Version: %(echo ${VMCONDOR_VERSION:-0.0})
+Version: %(echo ${VERSION:-00.00.00})
 Release: 1
 BuildArch: noarch
 Summary: vmcondor-client
@@ -27,3 +27,4 @@ make install
 %files
 /usr/bin/*
 /usr/lib/vmcondor-client
+ 
