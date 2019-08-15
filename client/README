@@ -1,4 +1,8 @@
-vmcondor_setup script to be installed on VMCondor users' machines.
+This directory contains
+
+1) vmcondor_setup script to be installed on VMCondor users' machines
+2) Makefile etc for packaging the script
+
 
 vmcondor_setup depends on the openssl, curl and condor_* commands being
 available on the Unix $PATH. No system level configuration of HTCondor
@@ -23,3 +27,38 @@ will other required configuration files.
 The vmcondor-client RPM can be used to install vmcondor_setup . The
 files example.sub and example.sh mentioned in the Users Guide are 
 installed in /usr/lib/vmcondor-client/
+
+3) Docker install
+
+The iris-vmcondor Docker image includes vmcondor_setup in 
+/usr/local/bin and VMCondor's dependencies: HTCondor, OpenSSL, Curl.
+
+To build the image to allow local testing: clone the repo and then 
+execute:
+
+make docker-build
+
+To push the image into Docker Hub and make it the latests verison, 
+execute:
+
+make docker-push
+
+When creating a container from the image, it is recommended that users
+mount a directory from their $HOME directory on the host as /home/user
+within the container. This can contain the files they write. This should
+make it easier to move to newer versions of the image whilst retaining
+their own files.
+
+On Linux or macOS, a command like this may be used to create and enter
+an iris-vmcondor Docker container as a non-privileged user:
+
+mkdir -p $HOME/iris-vmcondor-home
+docker run \
+  --volume $HOME/iris-vmcondor-home:/home/user \
+  --tty --interactive \
+  irisacuk/iris-vmcondor:latest
+
+The editors emacs, nano, joe, and vi are also installed.
+
+Please see https://github.com/iris-ac-uk/iris-vmcondor/wiki/Users-Guide
+for more about using VMCondor to submit jobs to IRIS.

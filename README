@@ -10,9 +10,8 @@ https://github.com/iris-ac-uk/iris-vmcondor/wiki
 
 This repository contains the following directories:
 
-- client, with the script users need to install on their client machines
+- client, with the script users need to install on their client machines,
+  and packaging scripts for RPM and Docker
 - server, with files for the prototype VMCondor server operated by IRIS
 - vmcondor-ca, with a script to generate certificates VMCondor uses internally
 - vm, with files to define the VMCondor virtual machines which run jobs
-- docker-client, with files to define the irisacuk/iris-vmcondor Docker image
-  which contains OpenSSL, Curl, HTCondor, and VMCondor commands

@@ -33,7 +33,7 @@
 
 include ../VERSION
 
-INSTALL_FILES=vmcondor_setup example.sub example.sh \
+INSTALL_FILES=vmcondor_setup example.sub example.sh 
           
 TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec ../VERSION
 
@@ -44,7 +44,7 @@ vmcondor-client.tgz: $(TGZ_FILES)
 	cd TEMPDIR ; $(GNUTAR) zcvf ../vmcondor-client.tgz --owner=root --group=root vmcondor-client
 	rm -R TEMPDIR
 
-install: $(INSTALL_FILES)
+install-for-rpm: $(INSTALL_FILES)
 	mkdir -p $(RPM_BUILD_ROOT)/usr/bin \
 	         $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
 	cp vmcondor_setup \
@@ -55,7 +55,7 @@ install: $(INSTALL_FILES)
 	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
 	$(RPM_BUILD_ROOT)/usr/bin/vmcondor_setup --just-symlinks
 	
-rpm: vmcondor-client.tgz
+rpm-build: vmcondor-client.tgz
 	rm -Rf RPMTMP
 	mkdir -p RPMTMP/SOURCES RPMTMP/SPECS RPMTMP/BUILD \
          RPMTMP/SRPMS RPMTMP/RPMS/noarch RPMTMP/BUILDROOT
@@ -64,3 +64,14 @@ rpm: vmcondor-client.tgz
 	  --define "_topdir $(shell pwd)/RPMTMP" \
 	  --buildroot $(shell pwd)/RPMTMP/BUILDROOT \
 	  vmcondor-client.spec
+
+docker-build: Dockerfile ../VERSION
+	cp ../VERSION copy.of.VERSION
+	docker build -t iris-vmcondor:$(VERSION) .
+	rm -f copy.of.*
+
+docker-push: docker-build
+	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:$(VERSION)
+	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:latest
+	docker push irisacuk/iris-vmcondor:$(VERSION)
+	docker push irisacuk/iris-vmcondor:latest

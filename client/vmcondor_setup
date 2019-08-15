@@ -32,7 +32,7 @@
 #  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-export VMCONDOR_VERSION=00.01
+export VMCONDOR_VERSION=00.01.01
 export VMCONDOR_HOST=vmcondor.iris.ac.uk
 export VMCONDOR_DIR=$HOME/.vmcondor
 export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
