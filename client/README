@@ -28,6 +28,12 @@ The vmcondor-client RPM can be used to install vmcondor_setup . The
 files example.sub and example.sh mentioned in the Users Guide are 
 installed in /usr/lib/vmcondor-client/
 
+To build the RPM, clone the iris-vmcondor repo and use make:
+
+git clone https://github.com/iris-ac-uk/iris-vmcondor.git
+cd iris-vmcondor/client
+make rpm-build
+
 3) Docker install
 
 The iris-vmcondor Docker image includes vmcondor_setup in 
