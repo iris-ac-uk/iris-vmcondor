@@ -31,37 +31,15 @@
 #  Contacts: Andrew.McNab@cern.ch  https://www.iris.ac.uk/
 #
 
-include ../VERSION
+include VERSION
 
-INSTALL_FILES=vmcondor_setup example.sub example.sh 
-          
-TGZ_FILES=$(INSTALL_FILES) Makefile vmcondor-client.spec ../VERSION
-
-GNUTAR ?= tar
-vmcondor-client.tgz: $(TGZ_FILES) rpm-Makefile
-	mkdir -p TEMPDIR/vmcondor-client
-	cp $(TGZ_FILES) TEMPDIR/vmcondor-client
-	cp rpm-Makefile TEMPDIR/Makefile
-	cd TEMPDIR ; $(GNUTAR) zcvf ../vmcondor-client.tgz --owner=root --group=root vmcondor-client
-	rm -R TEMPDIR
-	
-rpm-build: vmcondor-client.tgz
-	rm -Rf RPMTMP
-	mkdir -p RPMTMP/SOURCES RPMTMP/SPECS RPMTMP/BUILD \
-         RPMTMP/SRPMS RPMTMP/RPMS/noarch RPMTMP/BUILDROOT
-	cp -f vmcondor-client.tgz RPMTMP/SOURCES
-	export VERSION=$(VERSION) ; rpmbuild -ba \
-	  --define "_topdir $(shell pwd)/RPMTMP" \
-	  --buildroot $(shell pwd)/RPMTMP/BUILDROOT \
-	  vmcondor-client.spec
-
-docker-build: Dockerfile ../VERSION
-	cp ../VERSION copy.of.VERSION
-	docker build -t iris-vmcondor:$(VERSION) .
-	rm -f copy.of.*
-
-docker-push: docker-build
-	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:$(VERSION)
-	docker tag iris-vmcondor:$(VERSION) irisacuk/iris-vmcondor:latest
-	docker push irisacuk/iris-vmcondor:$(VERSION)
-	docker push irisacuk/iris-vmcondor:latest
+install:
+	mkdir -p $(RPM_BUILD_ROOT)/usr/bin \
+	         $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
+	cp vmcondor_setup \
+	   $(RPM_BUILD_ROOT)/usr/bin
+	cp VERSION \
+	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
+	cp example.sub example.sh \
+	   $(RPM_BUILD_ROOT)/usr/lib/vmcondor-client
+	$(RPM_BUILD_ROOT)/usr/bin/vmcondor_setup --just-symlinks
