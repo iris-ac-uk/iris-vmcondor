@@ -118,8 +118,8 @@ condor:
   UPDATE_INTERVAL: 60
   USE_SHARED_PORT: FALSE
   USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
-  VMCondorSite: '"##user_data_site##"'
-  VMCondorSpace: '"##user_data_space##"'
+  VMCondorSite: '##user_data_site##'
+  VMCondorSpace: '##user_data_space##'
 
 --===============1638429754541547438==
 MIME-Version: 1.0
@@ -147,9 +147,11 @@ chmod ugo+rwxt /var/spool/joboutputs/
 (
 # Cloud Init should do this automatically but something has changed since cernvm3 -> cernvm4
 ls -l /root/.ssh/authorized_keys
-curl http://169.254.169.254/2009-04-04/meta-data/public-keys/0/openssh-key > /root/.ssh/authorized_keys
-echo >> /root/.ssh/authorized_keys
-ls -l /root/.ssh/authorized_keys
+if [ ! -s /root/.ssh/authorized_keys ] ; then
+  curl http://169.254.169.254/2009-04-04/meta-data/public-keys/0/openssh-key > /root/.ssh/authorized_keys
+  echo >> /root/.ssh/authorized_keys
+  ls -l /root/.ssh/authorized_keys
+fi
 
 cat <<EOF >/tmp/x509proxy.pem
 ##user_data_option_x509_proxy##
@@ -172,7 +174,7 @@ do
   date --utc +"%Y-%m-%d %H:%M:%S %Z curl returns $?"
   sleep 300
 done
-) >/var/log/heartbeat.log 2>&1 &
+) >/var/spool/joboutputs/heartbeat.log 2>&1 &
 
 # Remove docker command etc since we don't start docker
 rpm --nodeps -e docker-cernvm
@@ -218,7 +220,7 @@ fi
 
 # Time to upload and shutdown
 cd /var/spool/joboutputs
-cp -f /var/log/condor/* /var/log/cloud-init*.log /scratch/joblogs/* .
+cp -f /var/log/condor/* /var/log/cloud-init*.log /scratch/joblogs/* /etc/condor/condor_config.local .
 for i in * 
 do 
   curl --capath /etc/grid-security/certificates/ --cert /tmp/x509proxy.pem --cacert /tmp/x509proxy.pem --location --upload-file "$i" '##user_data_joboutputs_url##/'
