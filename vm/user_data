@@ -95,7 +95,7 @@ condor:
   MASTER_DEBUG: D_ALWAYS
   MASTER_UPDATE_INTERVAL: 60
   MAXJOBRETIREMENTTIME: 172800
-  NEGOTIATOR_INTERVAL: 60
+  NEGOTIATOR_INTERVAL: 15
   NUM_SLOTS: 1
   PREEMPT: FALSE
   SEC_CLIENT_AUTHENTICATION: REQUIRED
@@ -109,17 +109,19 @@ condor:
   SEC_ENABLE_MATCH_PASSWORD_AUTHENTICATION: FALSE
   SLOT1_USER: cndrusr1
   START: FALSE
-  STARTD_ATTRS: VacuumSpace
   STARTD_DEBUG: D_ALWAYS
-  STARTD_NOCLAIM_SHUTDOWN: 600
+  STARTD_HISTORY: /var/spool/joboutputs/startd_history
+  STARTD_NOCLAIM_SHUTDOWN: 120
   STARTER_DEBUG: D_ALWAYS
   SUSPEND: FALSE
   UPDATE_COLLECTOR_WITH_TCP: TRUE
   UPDATE_INTERVAL: 60
   USE_SHARED_PORT: FALSE
   USER_JOB_WRAPPER: /usr/local/bin/user_job_wrapper
-  VMCondorSite: '##user_data_site##'
-  VMCondorSpace: '##user_data_space##'
+  #
+  STARTD_ATTRS: VMCondorSite VMCondorSpace
+  VMCondorSite: '"##user_data_site##"'
+  VMCondorSpace: '"##user_data_space##"'
 
 --===============1638429754541547438==
 MIME-Version: 1.0
@@ -202,17 +204,13 @@ condor_config_val -dump >/var/spool/joboutputs/condor_config_val-dump.log
 # Wait for condor_startd to start
 while ! ps -C condor_startd >/dev/null ; do date --utc +"%Y-%m-%d %H:%M:%S %Z condor_startd not yet started" ; sleep 10 ; done
 
-# In the background, give Condor startd 30 minutes to find a job then tell it to stop after the job (or now!)
-# Condor may stop before condor_off is run, due to STARTD_NOCLAIM_SHUTDOWN (600s?)
-(sleep 1800 ; while ! condor_off -daemon startd -peaceful ; do sleep 60; done) >/var/spool/joboutputs/condor_off.log 2>&1 &
-
 # Wait for condor_startd to stop
 date --utc +"%Y-%m-%d %H:%M:%S %Z Waiting for condor_startd to finish"
 while ps -C condor_startd >/dev/null ; do sleep 60 ; done
 date --utc +"%Y-%m-%d %H:%M:%S %Z condor_startd finished"
   
 # Always try to make simple HTCondor shutdown messages
-if [ ! -s /var/log/condor/startd_history ] ; then
+if [ ! -s /var/spool/joboutputs/startd_history ] ; then
   echo '300 No HTCondor job to run' > /var/spool/joboutputs/shutdown_message
 else
   echo '200 Success' > /var/spool/joboutputs/shutdown_message
