@@ -13,9 +13,9 @@
     "min_wallclock_seconds": 86400,
     "max_wallclock_seconds": 90000,
     "max_processors": 1,
-    "root_image": "https://repo.iris.ac.uk/iris-vmcondor/cernvm4.iso",
+    "root_image": "https://repo.iris.ac.uk/vmcondor/latest/vm/cernvm4.iso",
     "target_share": 1,
-    "user_data": "https://repo.iris.ac.uk/iris-vmcondor/user_data",
+    "user_data": "https://repo.iris.ac.uk/vmcondor/latest/vm/user_data",
     "user_data_proxy": "true"
    }
   ]

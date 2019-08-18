@@ -1,7 +1,9 @@
 Executable              = example.sh
-#Input			= example.stdin
 Output                  = example.stdout
 Error                   = example.stderr
+#Transfer_Input_Files   = 1.txt,2.txt,3.txt
+#Transfer_Output_Files  = a.txt,b.txt,c.txt
+#Requirements           = TARGET.VMCondorSite == "UKI-NORTHGRID-MAN-HEP"
 +Owner                  = undefined
 Notification            = never
 When_To_Transfer_Output = on_exit
