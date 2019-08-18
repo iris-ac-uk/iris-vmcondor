@@ -32,41 +32,67 @@
 #  Contacts: Andrew.McNab@cern.ch
 #
 
-if [ "$1" = "" -o "$2" = "" ] ; then
-  echo vmcondor-approve USERNAME EMAIL@ADDRESS
-  exit 0
+#
+# --rebuild option means we skip approving a user and 
+# just rebuild the configuration files
+#
+if [ "$1" != "--rebuild" ] ; then
+
+  if [ "$1" = "" -o "$2" = "" ] ; then
+    echo vmcondor-approve USERNAME EMAIL@ADDRESS
+    exit 0
+  fi
+
+  if [ -s "/var/lib/vmcondor-ca/approved/$1" ] ; then
+    echo "/var/lib/vmcondor-ca/approved/$1 already exists!"
+    exit 1
+  fi
+
+  if [ ! -s "/var/lib/vmcondor-ca/incoming/$1" ] ; then
+    echo "/var/lib/vmcondor-ca/incoming/$1 does not exist!"
+    exit 1
+  fi
+
+  (
+    echo "FQAN=/iris.ac.uk/Role=NULL/Capability=NULL"
+    echo "EMAIL=$2"
+    cat "/var/lib/vmcondor-ca/incoming/$1"
+
+  ) > "/var/lib/vmcondor-ca/approved/$1"
+
+  rm -f "/var/lib/vmcondor-ca/incoming/$1"
+
+  newUID=1`echo "$1" | cut -c5-8`
+
+  useradd --home-dir /var/lib/condor --comment "VMCondor $1" --no-create-home --shell /sbin/nologin --uid $newUID  "$1"
 fi
 
-if [ -s "/var/lib/vmcondor-ca/approved/$1" ] ; then
-  echo "/var/lib/vmcondor-ca/approved/$1 already exists!"
-  exit 1
-fi
-
-if [ ! -s "/var/lib/vmcondor-ca/incoming/$1" ] ; then
-  echo "/var/lib/vmcondor-ca/incoming/$1 does not exist!"
-  exit 1
-fi
-
+#
+# Rebuild the certificate-mapfile and sites list
+#
 (
-  echo "FQAN=/iris.ac.uk/Role=NULL/Capability=NULL"
-  echo "EMAIL=$2"
-  cat "/var/lib/vmcondor-ca/incoming/$1"
-
-) > "/var/lib/vmcondor-ca/approved/$1"
-
-rm -f "/var/lib/vmcondor-ca/incoming/$1"
-
-newUID=1`echo "$1" | cut -c5-8`
-
-useradd --home-dir /var/lib/condor --comment "VMCondor $1" --no-create-home --shell /sbin/nologin --uid $newUID  "$1"
-
-(
-  cd /var/lib/vmcondor-ca/approved
-
   echo '# DO NOT EDIT - CREATED BY vmcondor-approve'
-  echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=iris-vm.blackett.manchester.ac.uk" condor'
+  echo '# For admin/testing:'
   echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=andrew mcnab" condor'
 
+  # Force tmp file to be empty
+  echo -n > /var/www/html/.sitesnames.tmp
+  
+  cat /var/lib/vmcondor-ca/sites | (
+    while read sitename dn
+    do
+      echo "$sitname:"
+      echo "GSI \"$dn\" condor"
+      echo "$sitename" >>/var/www/html/.sitenames.tmp
+    done  
+  )
+
+  sort /var/www/html/.sitenames.tmp >/var/www/html/sitenames
+  rm -f /var/www/html/.sitenames.tmp
+
+  echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=iris-vm.blackett.manchester.ac.uk" condor'
+
+  cd /var/lib/vmcondor-ca/approved
   for username in `ls | grep '^user[0-9][0-9][0-9][0-9]$'`
   do
     echo 'GSI "/O=vmcondor.iris.ac.uk/CN='${username}'" '${username}
@@ -75,6 +101,7 @@ useradd --home-dir /var/lib/condor --comment "VMCondor $1" --no-create-home --sh
 
 mv -f /etc/condor/certificate_mapfile.tmp /etc/condor/certificate_mapfile
 
+#
+# Apply the changes
+#
 condor_reconfig -name "$HOSTNAME"
-
-

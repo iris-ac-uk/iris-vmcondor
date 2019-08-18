@@ -39,7 +39,7 @@ export CONDOR_CONFIG=$VMCONDOR_DIR/vmcondor_config
 export X509_USER_CERT=$VMCONDOR_DIR/vmcondor.key
 export X509_USER_KEY=$VMCONDOR_DIR/vmcondor.key
 export X509_CERT_DIR=$VMCONDOR_DIR/certificates
-export VMCONDOR_COMMANDS='vmcondor_version vmcondor_submit vmcondor_q vmcondor_status vmcondor_transfer_data'
+export VMCONDOR_COMMANDS='vmcondor_version vmcondor_submit vmcondor_q vmcondor_status vmcondor_transfer_data vmcondor_sitenames'
 
 BASENAME=`basename $0`
 if [ "$BASENAME" = "vmcondor_version" ] ; then
@@ -59,6 +59,10 @@ elif [ "$BASENAME" = "vmcondor_status" ] ; then
  exec condor_status -pool $VMCONDOR_HOST $*
 elif [ "$BASENAME" = "vmcondor_transfer_data" ] ; then 
  exec condor_transfer_data -pool $VMCONDOR_HOST -name vmcondor@$VMCONDOR_HOST $*
+elif [ "$BASENAME" = "vmcondor_sitenames" ] ; then
+ exec curl --silent --show-error \
+           --capath $VMCONDOR_DIR/certificates \
+           https://vmcondor-ca.iris.ac.uk/sitenames
 else
  (
    cd `dirname $0`
