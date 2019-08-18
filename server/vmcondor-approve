@@ -81,7 +81,7 @@ fi
   cat /var/lib/vmcondor-ca/sites | (
     while read sitename dn
     do
-      echo "$sitname:"
+      echo "$sitename:"
       echo "GSI \"$dn\" condor"
       echo "$sitename" >>/var/www/html/.sitenames.tmp
     done  
@@ -89,8 +89,6 @@ fi
 
   sort /var/www/html/.sitenames.tmp >/var/www/html/sitenames
   rm -f /var/www/html/.sitenames.tmp
-
-  echo 'GSI "/C=UK/O=eScience/OU=Manchester/L=HEP/CN=iris-vm.blackett.manchester.ac.uk" condor'
 
   cd /var/lib/vmcondor-ca/approved
   for username in `ls | grep '^user[0-9][0-9][0-9][0-9]$'`
