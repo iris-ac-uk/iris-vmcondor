@@ -60,6 +60,8 @@ write_files:
     content: |
         #!/bin/sh
         export HOME=`pwd`
+        export VMCONDOR_SITE='##user_data_site##'
+        export VMCONDOR_SPACE='##user_data_space##'
         . /etc/profile
         . /etc/bashrc
         . /cvmfs/grid.cern.ch/umd-c7wn-latest/etc/profile.d/setup-c7-wn-example.sh
