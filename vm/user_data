@@ -24,21 +24,12 @@ bootcmd:
   - hostname ##user_data_machine_hostname##
   - echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
   - echo `hostname --all-ip-addresses` `hostname` `hostname -s` >>/etc/hosts
-  - mkdir /scratch && chmod ugo+rwxt /scratch && mkfs -q -t ext4 /dev/vda2 && mount /dev/vda2 /scratch
-  - fallocate -l 8G /scratch/swapfile
-  - chmod 0600 /scratch/swapfile
-  - mkswap /scratch/swapfile
-  - swapon /scratch/swapfile
-  - sysctl vm.swappiness=1
 cvmfs:
     local:
         CVMFS_CACHE_BASE: /mnt/.rw/cvmfs-cache
         CVMFS_QUOTA_LIMIT: 7000
         CVMFS_REPOSITORIES: grid,alice,atlas,cms,lhcb
         CVMFS_HTTP_PROXY: ##user_data_option_cvmfs_proxy##
-runcmd:
-  - mkdir -p /scratch/condor/
-  - chown condor:condor /scratch/condor/
 write_files:
   - owner: root:root
     path: /etc/profile.d/mjf.sh
@@ -156,6 +147,30 @@ if [ ! -s /root/.ssh/authorized_keys ] ; then
   echo >> /root/.ssh/authorized_keys
   ls -l /root/.ssh/authorized_keys
 fi
+
+# For the big 40GB+ logical partition
+mkdir -p /scratch
+
+# Find the largest unformatted partition on any device
+sfdisk -sldu M | grep '^/dev/.*size=' | sed 's:\(/dev/[a-z]*[0-9]*\) .*size= *\([0-9]*\).*:\2 \1:' | sort -nr | (
+while read size device
+do
+  mkfs -q -t ext4 $device
+  if [ $? = 0 ] ; then
+   date --utc +"%Y-%m-%d %H:%M:%S %Z user_data_script Created $device for /scratch"
+   mount $device /scratch
+   break
+  fi
+done
+)
+
+fallocate -l 8G /scratch/swapfile
+chmod 0600 /scratch/swapfile
+mkswap /scratch/swapfile
+swapon /scratch/swapfile
+sysctl vm.swappiness=1
+mkdir -p /scratch/condor/
+chown condor:condor /scratch/condor/
 
 cat <<EOF >/tmp/x509proxy.pem
 ##user_data_option_x509_proxy##
