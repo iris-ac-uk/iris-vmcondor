@@ -143,7 +143,7 @@ chmod ugo+rwxt /var/spool/joboutputs/
 # Cloud Init should do this automatically but something has changed since cernvm3 -> cernvm4
 ls -l /root/.ssh/authorized_keys
 if [ ! -s /root/.ssh/authorized_keys ] ; then
-  curl http://169.254.169.254/2009-04-04/meta-data/public-keys/0/openssh-key > /root/.ssh/authorized_keys
+  curl http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key > /root/.ssh/authorized_keys
   echo >> /root/.ssh/authorized_keys
   ls -l /root/.ssh/authorized_keys
 fi
