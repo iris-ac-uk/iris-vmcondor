@@ -164,7 +164,7 @@ do
 done
 )
 
-fallocate -l 8G /scratch/swapfile
+fallocate -l 2G /scratch/swapfile
 chmod 0600 /scratch/swapfile
 mkswap /scratch/swapfile
 swapon /scratch/swapfile
