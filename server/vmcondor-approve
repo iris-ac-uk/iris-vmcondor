@@ -81,7 +81,7 @@ fi
   cat /var/lib/vmcondor-ca/sites | (
     while read sitename dn
     do
-      echo "$sitename:"
+      echo "# $sitename:"
       echo "GSI \"$dn\" condor"
       echo "$sitename" >>/var/www/html/.sitenames.tmp
     done  

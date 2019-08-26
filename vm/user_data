@@ -148,6 +148,8 @@ if [ ! -s /root/.ssh/authorized_keys ] ; then
   ls -l /root/.ssh/authorized_keys
 fi
 
+. /etc/profile.d/mjf.sh
+
 # For the big 40GB+ logical partition
 mkdir -p /scratch
 
